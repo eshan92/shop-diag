@@ -1,1 +1,1 @@
-# shop-diag
+diagnostic dumps only - no secrets
