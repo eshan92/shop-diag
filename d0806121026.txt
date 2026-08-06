@@ -1,0 +1,133 @@
+=== LOGIN HTML ===
+      </div>
+    </div>
+    <input class="login-input" type="password" id="lpass" placeholder="Enter password..." onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Login →</button>
+    <div class="login-err" id="lerr">Wrong password. Try again.</div>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="admin-app">
+  <button class="mob-btn" onclick="toggleMenu()">☰</button>
+  <aside class="sidebar">
+    <div class="logo">
+=== LOGIN JS ===
+754:function selRole(r){
+755-  role=r;
+756-  document.getElementById('role-admin').className='role-btn'+(r==='admin'?' selected':'');
+757-  document.getElementById('role-cashier').className='role-btn'+(r==='cashier'?' selected':'');
+758-}
+759-function showApp(r){
+760-  document.getElementById('login-screen').style.display='none';
+761-  if(r==='admin'){document.getElementById('admin-app').style.display='block';rDash();}
+762-  else{document.getElementById('cashier-app').style.display='block';rCashier();}
+763-}
+764:function doLogin(){
+765-  var pass=document.getElementById('lpass').value;
+766-  api('POST','/api/login',{role:role,password:pass}).then(function(data){
+767-    if(data.ok){
+768:      localStorage.setItem('session',role);
+769-      document.getElementById('lpass').value='';
+770-      showApp(role);
+771-    } else {
+772-      var e=document.getElementById('lerr');
+773-      e.style.display='block';
+774-      setTimeout(function(){e.style.display='none';},3000);
+775-    }
+776-  }).catch(function(){toast('Server error!',false);});
+777-}
+778-function doLogout(){
+779-  localStorage.removeItem('session');
+780-  document.getElementById('admin-app').style.display='none';
+=== API LOGIN ===
+@app.route("/api/login", methods=["POST"])
+def login():
+    data = request.json
+    conn = get_db()
+    key = "admin_pass" if data.get("role") == "admin" else "cashier_pass"
+    row = conn.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
+    conn.close()
+    if row and row["value"] == data.get("password"):
+        return jsonify({"ok": True})
+    return jsonify({"ok": False}), 401
+
+@app.route("/api/change-password", methods=["POST"])
+def change_password():
+    data = request.json
+    key = "admin_pass" if data.get("role") == "admin" else "cashier_pass"
+    conn = get_db()
+    conn.execute("UPDATE settings SET value=? WHERE key=?", (data["new_password"], key))
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True})
+
+=== API SALES POST ===
+@app.route("/api/sales", methods=["POST"])
+def add_sale():
+    data = request.json
+    items = data.get("items", [])
+    if not items:
+        return jsonify({"ok": False, "error": "No items"}), 400
+    conn = get_db()
+    total = 0; profit = 0; saved = []
+    try:
+        for it in items:
+            if it["type"] == "lot":
+                lot = conn.execute("SELECT * FROM lots WHERE id=?", (it["lid"],)).fetchone()
+                if not lot or lot["pieces"] < it["qty"]:
+                    return jsonify({"ok": False, "error": it["name"] + " not enough stock!"}), 400
+                sub = it["sp"] * it["qty"]
+                prf = (it["sp"] - lot["buy"]) * it["qty"]
+                total += sub; profit += prf
+                conn.execute("UPDATE lots SET pieces=pieces-? WHERE id=?", (it["qty"], it["lid"]))
+                saved.append({"type":"lot","ref_id":it["lid"],"name":it["name"],"buy_price":lot["buy"],"sell_price":it["sp"],"qty":it["qty"],"subtotal":sub,"profit":prf})
+            else:
+                prod = conn.execute("SELECT * FROM products WHERE id=?", (it["pid"],)).fetchone()
+                if not prod or prod["stock"] < it["qty"]:
+                    return jsonify({"ok": False, "error": it["name"] + " not enough stock!"}), 400
+                sub = it["sp"] * it["qty"]
+                prf = (it["sp"] - prod["buy_price"]) * it["qty"]
+                total += sub; profit += prf
+                conn.execute("UPDATE products SET stock=stock-? WHERE id=?", (it["qty"], it["pid"]))
+                saved.append({"type":"product","ref_id":it["pid"],"name":it["name"],"buy_price":prod["buy_price"],"sell_price":it["sp"],"qty":it["qty"],"subtotal":sub,"profit":prf})
+        now = datetime.now()
+        cur = conn.execute("INSERT INTO sales (date,time,total,profit) VALUES (?,?,?,?)", (today(), now.strftime("%I:%M %p"), total, profit))
+        sid = cur.lastrowid
+        for it in saved:
+            conn.execute("INSERT INTO sale_items (sale_id,name,type,ref_id,buy_price,sell_price,qty,subtotal,profit) VALUES (?,?,?,?,?,?,?,?,?)",
+                (sid, it["name"], it["type"], it["ref_id"], it["buy_price"], it["sell_price"], it["qty"], it["subtotal"], it["profit"]))
+        conn.commit()
+        conn.close()
+        return jsonify({"ok": True, "total": total, "profit": profit})
+    except Exception as e:
+        conn.close()
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+=== rCToday ===
+1351:function rCToday(){
+1352-  var td=today();
+1353-  api('GET','/api/sales?from='+td+'&to='+td).then(function(sales){
+1354-    var inc=sales.reduce(function(a,s){return a+s.total;},0);
+1355-    document.getElementById('ctstats').innerHTML=
+1356-      '<div class="cstat"><div class="sl">Today Income</div><div class="sv" style="color:var(--accent)">Rs.'+fmt(inc)+'</div></div>'+
+1357-      '<div class="cstat"><div class="sl">Transactions</div><div class="sv" style="color:var(--green)">'+sales.length+'</div></div>';
+1358-    if(!sales.length){document.getElementById('cttxns').innerHTML='<div class="cemp">No transactions today</div>';return;}
+1359-    document.getElementById('cttxns').innerHTML=sales.map(function(s){
+1360-      var detail=s.items.map(function(x){return '<span style="background:var(--al);color:var(--accent);border-radius:4px;padding:1px 6px;font-size:10px;font-family:\'JetBrains Mono\',monospace;margin-right:3px">'+x.name+' ×'+x.qty+'</span>';}).join('');
+1361-      return '<div class="ctx"><div class="ctxh"><span class="ctxt">'+s.time+'</span><span class="ctxa">Rs.'+fmt(s.total)+'</span></div><div class="ctxi">'+detail+'</div></div>';
+1362-    }).join('');
+1363-  });
+1364-}
+1365-</script>
+1366-
+1367-<div id="ledit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center;padding:16px">
+1368-  <div style="background:var(--surface);border-radius:16px;padding:22px;width:100%;max-width:380px;box-shadow:var(--shl)">
+1369-    <div style="font-size:16px;font-weight:700;margin-bottom:4px">Edit Lot</div>
+1370-    <div id="ledit-name" style="font-size:13px;color:var(--accent);font-weight:600;margin-bottom:16px"></div>
+1371-    <input type="hidden" id="ledit-id">
+1372-    <div style="margin-bottom:12px"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">Sell Price</div>
+1373-    <input type="number" id="ledit-sell" step="0.5" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-size:14px;outline:none;box-sizing:border-box"></div>
+1374-    <div style="margin-bottom:12px"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">Pieces</div>
+1375-    <input type="number" id="ledit-pcs" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-size:14px;outline:none;box-sizing:border-box"></div>
+1376-    <div style="margin-bottom:18px"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">Min Pieces</div>
