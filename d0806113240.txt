@@ -1,0 +1,24 @@
+=== STATUS ===
+● shop.service - Tobacco shop app
+     Loaded: loaded (/etc/systemd/system/shop.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2026-08-06 11:32:36 UTC; 4s ago
+   Main PID: 255994 (python3)
+      Tasks: 3 (limit: 1001)
+     Memory: 32.3M (peak: 32.5M)
+=== VERSION ===
+{"version":"2.1"}
+
+=== SUMMARY ===
+{"bank_balance":0.0,"today_cash_in_hand":0,"today_deposits":0,"today_expenses":0,"today_sales":0}
+
+=== LOG ===
+Aug 06 11:32:37 vultr shop[255994]: shop_bank registered
+Aug 06 11:32:37 vultr shop[255994]: Shop Manager Starting...
+Aug 06 11:32:37 vultr shop[255994]: Server running on port 8090
+Aug 06 11:32:37 vultr shop[255994]:  * Serving Flask app 'server'
+Aug 06 11:32:37 vultr shop[255994]:  * Debug mode: off
+Aug 06 11:32:37 vultr shop[255994]: WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+Aug 06 11:32:37 vultr shop[255994]:  * Running on http://127.0.0.1:8090
+Aug 06 11:32:37 vultr shop[255994]: Press CTRL+C to quit
+Aug 06 11:32:40 vultr shop[255994]: 127.0.0.1 - - [06/Aug/2026 11:32:40] "GET /api/appversion HTTP/1.1" 200 -
+Aug 06 11:32:40 vultr shop[255994]: 127.0.0.1 - - [06/Aug/2026 11:32:40] "GET /api/bank/summary HTTP/1.1" 200 -
