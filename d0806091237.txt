@@ -1,0 +1,53 @@
+=== STOCK PAGE ===
+505-        </div>
+506-        <div class="card"><div class="ct">Recently Added</div>
+507-          <table><thead><tr><th>Lot</th><th>Buy</th><th>Pieces</th><th>Date</th></tr></thead>
+508-          <tbody id="rlots"></tbody></table>
+509-        </div>
+510-      </div>
+511-    </div>
+512-
+513-    <!-- STOCK -->
+514-    <div class="page" id="page-stock">
+515-      <div class="ph"><div><div class="pt">Other Stock</div><div class="ps">INVENTORY</div></div><button class="btn bs" onclick="go('stock-in')">+ Add Stock</button></div>
+516-      <div class="thr" id="scards" style="margin-bottom:14px"></div>
+517-      <div class="card"><div class="ct">Stock Details</div>
+518-        <table><thead><tr><th>Item</th><th>Unit</th><th>Buy</th><th>Sell</th><th>Stock</th><th>Value</th><th>Status</th></tr></thead>
+519:        <tbody id="stktbl"></tbody></table>
+=== BODY/MAIN CSS ===
+37:body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+81:.main{margin-left:215px;padding:22px;min-height:100vh;}
+310:  .main{margin-left:0;padding:14px;padding-bottom:75px;}
+330:  .main{padding:10px;padding-bottom:75px;}
+=== go() + closeMore ===
+(function(){
+  var sess=localStorage.getItem('session');
+  if(sess){role=sess;showApp(sess);}
+})();
+
+// ===== MOBILE NAV =====
+function toggleMenu(){document.querySelector('.sidebar').classList.toggle('open');}
+function setBotNav(el){
+  document.querySelectorAll('.bot-nav-item').forEach(function(b){b.classList.remove('active');});
+  if(el)el.classList.add('active');
+}
+function toggleMore(e){e.stopPropagation();document.getElementById('bot-more').classList.toggle('open');}
+function closeMore(){document.getElementById('bot-more').classList.remove('open');}
+document.addEventListener('click',function(){closeMore();});
+
+// ===== ADMIN NAV =====
+function go(page){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  var el=document.getElementById('page-'+page);
+  if(el)el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n){
+    if(n.getAttribute('onclick')&&n.getAttribute('onclick').indexOf(page)>-1)n.classList.add('active');
+  });
+  if(page==='dashboard')rDash();
+  if(page==='new-sale')rNewSale();
+  if(page==='lots')rLots();
+  if(page==='add-lot')rAddLot();
+  if(page==='stock')rStock();
+  if(page==='stock-in')rStockIn();
+  if(page==='expenses')rExpenses();
