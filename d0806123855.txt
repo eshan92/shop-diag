@@ -1,0 +1,88 @@
+=== SETTINGS PRICES SECTION ===
+            <div class="fm"><label>Confirm</label><input type="password" id="ccf"></div>
+            <button class="btn bs" onclick="chgPass('cashier')">Update Cashier</button>
+            <div id="cpm" style="font-size:11px;margin-top:4px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="setcard">
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">🏪 Product Sell Prices</div>
+        <div id="pset"></div>
+      </div>
+      <div class="setcard"><div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">Session</div><button class="btn bs" onclick="doLogout()">Logout</button></div>
+      <div class="setcard">
+        <div style="font-size:14px;font-weight:700;color:var(--red);margin-bottom:12px">⚠️ Danger Zone</div>
+        <button class="btn bd" onclick="clearAll()">Clear All Data</button>
+        <span style="font-size:11px;color:var(--text3);margin-left:10px">Deletes all sales, lots and stock data.</span>
+      </div>
+    </div>
+
+  <!-- BOTTOM NAV (Mobile) -->
+  <nav class="bot-nav">
+    <div class="bot-nav-items">
+      <button class="bot-nav-item active" onclick="go('dashboard');setBotNav(this)"><span class="bni">📊</span>Dash</button>
+      <button class="bot-nav-item" onclick="go('new-sale');setBotNav(this)"><span class="bni">🛒</span>Sale</button>
+      <button class="bot-nav-item" onclick="go('lots');setBotNav(this)"><span class="bni">🚬</span>Lots</button>
+=== cAProd + cALot + rCOrder ===
+1318:function cALot(lid,buy,sell,name){
+1319-  var ex=null;
+1320-  for(var j=0;j<cItems.length;j++){if(cItems[j].type==='lot'&&cItems[j].lid===lid){ex=cItems[j];break;}}
+1321-  if(ex){ex.qty++;}else{cItems.push({type:'lot',lid:lid,name:name,buy:buy,sp:sell,qty:1});}
+1322-  rCOrder();
+1323-}
+1324:function cAProd(pid,name,buy,sell){
+1325-  var ex=null;
+1326-  for(var j=0;j<cItems.length;j++){if(cItems[j].type==='product'&&cItems[j].pid===pid){ex=cItems[j];break;}}
+1327-  if(ex){ex.qty++;}else{cItems.push({type:'product',pid:pid,name:name,buy:buy,sp:sell,qty:1});}
+1328-  rCOrder();
+1329-}
+1330-
+1331:function rCOrder(){
+1332-  var c=document.getElementById('colist');
+1333-  if(!cItems.length){c.innerHTML='<div class="cemp">No items added yet</div>';document.getElementById('ctotal').textContent='0.00';return;}
+1334-  var grand=0,html='';
+1335-  for(var i=0;i<cItems.length;i++){
+1336-    var it=cItems[i];var sub=it.sp*it.qty;grand+=sub;
+1337-    html+='<div class="coi"><span class="cin">'+it.name+'</span>'+
+1338-      '<input class="csi" type="number" value="'+it.sp+'" data-i="'+i+'" data-def="'+it.sp+'" onfocus="this.value=\'\'" onblur="if(!this.value)this.value=this.dataset.def" onchange="cUSell(this)">'+
+1339-      '<input class="cqi" type="number" value="'+it.qty+'" min="1" data-i="'+i+'" onchange="cUQty(this)">'+
+1340-      '<span class="cisub">Rs.'+fmt(sub)+'</span>'+
+1341-      '<button class="crm" onclick="cRm('+i+')">✕</button></div>';
+1342-  }
+1343-  c.innerHTML=html;
+1344-  document.getElementById('ctotal').textContent=fmt(grand);
+1345-}
+1346-function cUSell(el){cItems[parseInt(el.dataset.i)].sp=parseFloat(el.value)||0;rCOrder();}
+1347-function cUQty(el){cItems[parseInt(el.dataset.i)].qty=parseInt(el.value)||1;rCOrder();}
+1348-function cRm(i){cItems.splice(i,1);rCOrder();}
+1349:function cComplete(){doSale(cItems,function(){cItems=[];rCOrder();rCLots();rCOther();});}
+1350-
+1351-function rCToday(){
+1352-  var td=today();
+1353-  api('GET','/api/sales?from='+td+'&to='+td).then(function(sales){
+1354-    var inc=sales.reduce(function(a,s){return a+s.total;},0);
+1355-    document.getElementById('ctstats').innerHTML=
+1356-      '<div class="cstat"><div class="sl">Today Income</div><div class="sv" style="color:var(--accent)">Rs.'+fmt(inc)+'</div></div>'+
+1357-      '<div class="cstat"><div class="sl">Transactions</div><div class="sv" style="color:var(--green)">'+sales.length+'</div></div>';
+1358-    if(!sales.length){document.getElementById('cttxns').innerHTML='<div class="cemp">No transactions today</div>';return;}
+1359-    document.getElementById('cttxns').innerHTML=sales.map(function(s){
+1360-      var detail=s.items.map(function(x){return '<span style="background:var(--al);color:var(--accent);border-radius:4px;padding:1px 6px;font-size:10px;font-family:\'JetBrains Mono\',monospace;margin-right:3px">'+x.name+' ×'+x.qty+'</span>';}).join('');
+1361-      return '<div class="ctx"><div class="ctxh"><span class="ctxt">'+s.time+'</span><span class="ctxa">Rs.'+fmt(s.total)+'</span></div><div class="ctxi">'+detail+'</div></div>';
+1362-    }).join('');
+1363-  });
+1364-}
+1365-</script>
+1366-
+1367-<div id="ledit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center;padding:16px">
+1368-  <div style="background:var(--surface);border-radius:16px;padding:22px;width:100%;max-width:380px;box-shadow:var(--shl)">
+1369-    <div style="font-size:16px;font-weight:700;margin-bottom:4px">Edit Lot</div>
+=== STOCK PAGE TOP ===
+529:    <div class="page" id="page-stock">
+530-      <div class="ph"><div><div class="pt">Other Stock</div><div class="ps">INVENTORY</div></div><button class="btn bs" onclick="go('stock-in')">+ Add Stock</button></div>
+531-      <div class="thr" id="scards" style="margin-bottom:14px"></div>
+532-      <div class="card"><div class="ct">Stock Details</div>
+533-        <div class="tscroll">
+534-        <table style="min-width:620px"><thead><tr><th>Item</th><th>Unit</th><th>Buy</th><th>Sell</th><th>Stock</th><th>Value</th><th>Status</th></tr></thead>
+535-        <tbody id="stktbl"></tbody></table>
+=== LAST PRICE QUERY TEST ===
+[]
