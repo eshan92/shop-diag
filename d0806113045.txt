@@ -1,0 +1,27 @@
+=== SERVICE ===
+● shop.service - Tobacco shop app
+     Loaded: loaded (/etc/systemd/system/shop.service; enabled; preset: enabled)
+     Active: activating (auto-restart) (Result: exit-code) since Thu 2026-08-06 11:30:42 UTC; 3s ago
+    Process: 255912 ExecStart=/usr/bin/python3 /var/www/shop/server.py (code=exited, status=1/FAILURE)
+   Main PID: 255912 (code=exited, status=1/FAILURE)
+        CPU: 642ms
+
+Aug 06 11:30:42 vultr systemd[1]: shop.service: Failed with result 'exit-code'.
+=== SCREEN ===
+There is a screen on:
+	107037.shop	(08/03/2026 12:41:49 PM)	(Detached)
+1 Socket in /run/screen/S-root.
+=== PROCESS ===
+root       27923  0.0  0.7 205332  6988 ?        Ss   Jul31   2:00 /usr/bin/python3 /root/bot_v33/bot_server.py
+root      107037  0.0  0.1   7204  1904 ?        Ss   Aug03   0:02 SCREEN -S shop -d -m bash -c cd /var/www/shop && python3 server.py
+root      107039  1.7  2.7 637904 26784 pts/1    Ssl+ Aug03  72:49 python3 server.py
+=== PORT ===
+LISTEN 0      128        127.0.0.1:8090      0.0.0.0:*    users:(("python3",pid=107039,fd=3))                        
+LISTEN 0      511          0.0.0.0:8080      0.0.0.0:*    users:(("nginx",pid=104934,fd=7),("nginx",pid=104933,fd=7))
+=== PATCH CHECK ===
+953:    import shop_bank
+954:    app.register_blueprint(shop_bank.bp)
+955:    print('shop_bank registered')
+957:    print('shop_bank FAILED:', _e)
+=== IMPORT TEST ===
+import OK 2.1
