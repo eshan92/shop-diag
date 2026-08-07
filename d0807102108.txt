@@ -1,0 +1,54 @@
+=== CHART CODE ===
+    if(!sales.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:14px">No sales today</td></tr>';return;}
+    tb.innerHTML=sales.slice(0,8).map(function(s){
+      return '<tr><td class="mn">'+s.time+'</td><td style="font-size:11px">'+s.items.map(function(i){return i.name;}).join(', ')+'</td><td class="mn bl">Rs.'+fmt(s.total)+'</td><td class="mn gr">Rs.'+fmt(s.profit)+'</td></tr>';
+    }).join('');
+
+    // Weekly chart
+    api('GET','/api/sales').then(function(allSales){
+      var days=[];
+      for(var i=6;i>=0;i--){
+        var d=new Date();d.setDate(d.getDate()-i);
+        var ds=d.toISOString().split('T')[0];
+        var inc=allSales.filter(function(s){return s.date===ds;}).reduce(function(a,s){return a+s.total;},0);
+        days.push({lbl:['Su','Mo','Tu','We','Th','Fr','Sa'][d.getDay()],inc:inc,date:ds});
+      }
+      var mx=Math.max.apply(null,days.map(function(d){return d.inc;}).concat([1]));
+      document.getElementById('wchart').innerHTML=days.map(function(d){
+        var h=Math.max(3,(d.inc/mx)*80);
+        var it=d.date===today();
+        return '<div class="bw"><div class="bb" style="height:'+h+'px;background:'+(it?'var(--accent)':'var(--border2)')+'"></div><div class="bl2">'+d.lbl+'</div></div>';
+      }).join('');
+    });
+  });
+
+  // Lots
+  api('GET','/api/lots').then(function(lots){
+    document.getElementById('dlots').innerHTML=lots.map(function(lot){
+      var pct=Math.min(100,(lot.pieces/(lot.min_pieces*4))*100);
+      var low=lot.pieces<=lot.min_pieces;
+      return '<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12px"><span class="tag">'+lname(lot)+'</span><span style="font-family:\'JetBrains Mono\',monospace;color:'+(low?'var(--red)':'var(--green)')+'">'+lot.pieces+' pcs</span></div><div class="sb"><div class="sbf" style="width:'+pct+'%;background:'+(low?'var(--red)':'var(--green)')+'"></div></div>'+(low?'<div style="font-size:10px;color:var(--red)">Low!</div>':'')+'</div>';
+    }).join('')||'<div style="color:var(--text3);font-size:12px;padding:6px">No lots</div>';
+  });
+=== BC CSS ===
+162:.bc{display:flex;align-items:flex-end;gap:5px;height:90px;}
+=== LOTS FORM END ===
+1003:function addLot(){
+1004-  var buy=parseFloat(document.getElementById('lbuy').value);
+1005-  var sell=parseFloat(document.getElementById('lsell').value);
+1006-  var pcs=parseInt(document.getElementById('lpieces').value);
+1007-  var mn=parseInt(document.getElementById('lmin').value)||50;
+1008-  var note=document.getElementById('lnote').value;
+1009-  if(!buy||!sell||!pcs){toast('Fill required fields!',false);return;}
+1010-  api('POST','/api/lots',{buy:buy,sell:sell,pieces:pcs,min_pieces:mn,note:note,ltype:(document.querySelector('#ltype .ltsel')?document.querySelector('#ltype .ltsel').dataset.v:'N')}).then(function(d){
+1011-    if(d.ok){
+1012-      toast('Lot added!');
+1013-      ['lbuy','lsell','lpieces','lmin','lnote'].forEach(function(id){document.getElementById(id).value='';});
+1014-      document.getElementById('lpv').style.display='none';
+1015-      rAddLot();
+1016-    }
+1017-  });
+1018-}
+1019-
+1020-// ===== STOCK =====
+1021-function rStock(){
