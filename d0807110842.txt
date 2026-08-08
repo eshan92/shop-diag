@@ -1,7 +1,0 @@
-=== PURCHASES ===
-{'id': 1, 'time': '11:07', 'kind': 'stock', 'descr': '1000 betel @2.50 + 500 areca @14 (part)', 'amount': 8000.0, 'source': 'cash'}
-{'id': 2, 'time': '11:07', 'kind': 'stock', 'descr': 'betel+areca (my money)', 'amount': 1500.0, 'source': 'owner'}
-
-=== OWNER TXNS ===
-{'id': 1, 'time': '10:59', 'type': 'in', 'amount': 1500.0, 'note': 'To buy bulath 1000 and puwak 500', 'source': 'cash'}
-{'id': 2, 'time': '11:07', 'type': 'in', 'amount': 1500.0, 'note': 'Purchase: betel+areca (my money)', 'source': 'direct'}
