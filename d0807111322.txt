@@ -1,7 +1,0 @@
-552-            <div style="display:flex;gap:10px;align-items:center">
-553-              <button class="btn bs" onclick="addStock()">Add Stock</button>
-554-              <span id="sipp" style="color:var(--text3);font-size:12px;font-family:'JetBrains Mono',monospace"></span>
-555-            </div>
-556-          </div>
-557-        </div>
-558:        <div class="card"><div class="ct">Stock History</div>
