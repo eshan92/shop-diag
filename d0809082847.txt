@@ -1,0 +1,26 @@
+831:function rDash(){
+832-  var td=today();
+833-  var now=new Date();
+834-  var mo=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+835-
+836-  // Today stats
+837-  api('GET','/api/stats/today').then(function(d){
+838-    document.getElementById('s1').textContent=fmt(d.income);
+839-    document.getElementById('s2').textContent=fmt(d.profit);
+840-    document.getElementById('s4').textContent=d.count;
+841-  });
+842-
+843-  // Month stats
+844-  api('GET','/api/stats/month?month='+mo).then(function(d){
+845-    document.getElementById('s3').textContent=fmt(d.income);
+846-  });
+847-
+848-  // Today sales
+849-  api('GET','/api/sales?from='+td+'&to='+td).then(function(sales){
+850-    var tb=document.getElementById('dsales');
+851-    if(!sales.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:14px">No sales today</td></tr>';return;}
+852-    tb.innerHTML=sales.slice(0,8).map(function(s){
+853-      return '<tr><td class="mn">'+s.time+'</td><td style="font-size:11px">'+s.items.map(function(i){return i.name;}).join(', ')+'</td><td class="mn bl">Rs.'+fmt(s.total)+'</td><td class="mn gr">Rs.'+fmt(s.profit)+'</td></tr>';
+854-    }).join('');
+855-
+856-    // Weekly chart
