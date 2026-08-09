@@ -1,0 +1,44 @@
+=== PRODUCTS POST ===
+    return jsonify(prods)
+
+@app.route("/api/products", methods=["POST"])
+def add_product():
+    data = request.json
+    conn = get_db()
+    conn.execute("INSERT INTO products (name,unit,buy_price,sell_price,stock,min_stock) VALUES (?,?,?,?,?,?)",
+        (data["name"], data.get("unit","pcs"), float(data.get("buy_price",0)), float(data.get("sell_price",0)), int(data.get("stock",0)), int(data.get("min_stock",50))))
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True})
+
+@app.route("/api/products/<int:pid>", methods=["DELETE"])
+def delete_product(pid):
+    conn = get_db()
+    conn.execute("DELETE FROM products WHERE id=?", (pid,))
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True})
+
+@app.route("/api/products/<int:pid>", methods=["PUT"])
+def update_product(pid):
+    data = request.json
+    conn = get_db()
+    for field in ["sell_price","buy_price","stock"]:
+        if field in data:
+            conn.execute("UPDATE products SET " + field + "=? WHERE id=?", (data[field], pid))
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True})
+=== PRODUCTS SAMPLE ===
+[{"buy_price":2.5942,"id":1,"min_stock":100,"name":"Betel Leaf","sell_price":5.0,"stock":1232,"unit":"leaf"},{"buy_price":13.8051,"id":2,"min_stock":80,"name":"Areca Nut","sell_price":20.0,"stock":554,"unit":"nut"}]
+
+=== STOCK PAGE ===
+535:    <div class="page" id="page-stock">
+536-      <div class="ph"><div><div class="pt">Other Stock</div><div class="ps">INVENTORY</div></div><button class="btn bs" onclick="go('stock-in')">+ Add Stock</button></div>
+537-      <div class="thr" id="scards" style="margin-bottom:14px"></div>
+538-      <div class="card"><div class="ct">Stock Details</div>
+539-        <div class="tscroll">
+540-        <table style="min-width:620px"><thead><tr><th>Item</th><th>Unit</th><th>Buy</th><th>Sell</th><th>Stock</th><th>Value</th><th>Status</th></tr></thead>
+541-        <tbody id="stktbl"></tbody></table>
+542-        </div>
+543-      </div>
