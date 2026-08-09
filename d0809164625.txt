@@ -1,0 +1,5 @@
+205:.hsale{padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;}
+206:.hsale:last-child{border-bottom:none;}
+207:.hsale:hover{background:var(--surface2);}
+208:.hsale-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+209:.hsale-time{font-size:11px;font-weight:600;color:var(--text2);font-family:'JetBrains Mono',monospace;}
