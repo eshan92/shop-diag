@@ -1,5 +1,0 @@
-=== SNAPSHOTS ===
-{'date': '2026-08-08', 'cash': 9149.92, 'bank': 6708.43, 'stock': 42735.5, 'owner_loan': 9500.0, 'capital': 49093.85, 'income': 270.0, 'net_profit': 110.0}
-
-=== HEALTH ===
-{"alerts":[["good","Healthy: 36.6% gross margin, 36.6% net margin"]],"balances":{"bank":6708.43,"capital":42393.85,"cash":2449.92,"owner_loan":9500.0,"stock":42735.5},"change":{"expenses":0.0,"gross":100.0,"income":100.0,"net":100.0,"txns":100.0},"current":{"bulath_wita":0,"cogs":5797.0,"expenses":0,"gross":3352.92,"income":9149.92,"net":3352.92,"txns":50},"days":7,"previous":{"bulath_wita":0,"cogs":0,"expenses":0,"gross":0,"income":0,"net":0,"txns":0},"ratios":{"avg_sale":183.0,"daily_avg_profit":478.99,"days_of_stock":52.0,"expense_ratio":0.0,"gross_margin":36.6,"liquidity":21.6,"net_margin":36.6,"stock_turnover":7.07}}

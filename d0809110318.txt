@@ -1,0 +1,40 @@
+205:.hsale{padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;}
+206:.hsale:last-child{border-bottom:none;}
+207:.hsale:hover{background:var(--surface2);}
+208:.hsale-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+209:.hsale-time{font-size:11px;font-weight:600;color:var(--text2);font-family:'JetBrains Mono',monospace;}
+210:.hsale-amt{font-size:13px;font-weight:700;color:var(--accent);font-family:'JetBrains Mono',monospace;}
+211:.hsale-prf{font-size:11px;color:var(--green);font-family:'JetBrains Mono',monospace;}
+212:.hsale-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;}
+213-.htag{background:var(--al);color:var(--accent);border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600;font-family:'JetBrains Mono',monospace;}
+214:.hsale-detail{display:none;margin-top:8px;background:var(--surface2);border-radius:8px;overflow:hidden;}
+215:.hsale-detail.open{display:block;}
+216:.hsale-detail table{width:100%;}
+217:.hsale-detail th{font-size:9px;padding:5px 9px;background:var(--border);color:var(--text3);}
+218:.hsale-detail td{font-size:11px;padding:6px 9px;border-bottom:1px solid var(--border);}
+219:.hsale-detail tr:last-child td{border-bottom:none;}
+220-
+221-#toast{position:fixed;bottom:18px;right:18px;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;transform:translateY(60px);opacity:0;transition:all .3s;box-shadow:var(--shl);}
+222-#toast.show{transform:translateY(0);opacity:1;}
+223-#toast.ok{background:var(--green);color:#fff;}
+224-#toast.err{background:var(--red);color:#fff;}
+225-
+226-/* ===== CASHIER ===== */
+227-#cashier-app{display:none;min-height:100vh;background:var(--bg);}
+228-.ch{background:var(--surface);border-bottom:1px solid var(--border);padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:var(--sh);}
+229-.ch h1{font-size:15px;font-weight:700;color:var(--text);}
+230-.ctime{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+231-.clbtn{background:var(--rl);border:1px solid var(--red);color:var(--red);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
+--
+1169:        return '<div class="hsale" onclick="tgSale(\''+sid+'\')">' +
+1170:          '<div class="hsale-hdr"><span class="hsale-time">'+s.time+'</span><div style="display:flex;gap:10px;align-items:center"><span class="hsale-prf">+Rs.'+fmt(s.profit)+'</span><span class="hsale-amt">Rs.'+fmt(s.total)+'</span></div></div>'+
+1171:          '<div class="hsale-tags">'+tags+'</div>'+
+1172:          '<div class="hsale-detail" id="'+sid+'">'+
+1173-            '<div class="tscroll"><table style="min-width:560px"><thead><tr><th>Item</th><th>Buy</th><th>Sell</th><th>Qty</th><th>Total</th><th>Profit</th></tr></thead><tbody>'+detailRows+'</tbody></table></div>'+
+1174-            '<div style="display:flex;justify-content:flex-end;gap:16px;padding:8px 12px;background:var(--surface2);border-top:1px solid var(--border)">'+
+1175-              '<span style="font-size:11px;color:var(--text3)">Total: <strong style="color:var(--accent)">Rs.'+fmt(s.total)+'</strong></span>'+
+1176-              '<span style="font-size:11px;color:var(--text3)">Profit: <strong style="color:var(--green)">Rs.'+fmt(s.profit)+'</strong></span>'+
+1177-            '</div></div></div>';
+1178-      }).join('');
+1179-      var dayId='hd-'+di;
+1180-      return '<div class="hday"><div class="hday-hdr" onclick="tgDay(\''+dayId+'\')">'+
