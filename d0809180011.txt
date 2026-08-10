@@ -1,7 +1,0 @@
-612-      <!-- Search & Filter Bar -->
-613-      <div class="card" style="margin-bottom:14px">
-614-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-615:          <input type="text" id="hsearch" placeholder="🔍 Search item name..." oninput="loadHist()"
-616-            style="background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 11px;color:var(--text);font-size:12px;outline:none;flex:1;min-width:160px">
-617-          <input type="date" id="hfrom"
-618-            style="background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:6px 9px;color:var(--text);font-size:12px;outline:none">

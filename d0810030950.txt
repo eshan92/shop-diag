@@ -1,0 +1,14 @@
+function uSell(el){sItems[parseInt(el.dataset.i)].sp=parseFloat(el.value)||0;rSaleItems();}
+function uQty(el){sItems[parseInt(el.dataset.i)].qty=parseInt(el.value)||1;rSaleItems();}
+function rmItem(i){sItems.splice(i,1);rSaleItems();}
+function clearSale(){sItems=[];rSaleItems();}
+function completeSale(){doSale(sItems,function(){sItems=[];rSaleItems();rNewSale();});}
+
+// ===== SHARED SALE =====
+function doSale(items,cb){
+  if(!items.length){toast('Add items first!',false);return;}
+  var payload=items.map(function(it){return {type:it.type,lid:it.lid||null,pid:it.pid||null,name:it.name,sp:it.sp,qty:it.qty};});
+  api('POST','/api/sales',{by:(localStorage.getItem('session_user')||localStorage.getItem('session')||''),items:payload}).then(function(data){
+    if(data.ok){
+      toast('Sale done! Rs.'+fmt(data.total));
+      if(cb)cb();
