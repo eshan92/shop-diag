@@ -1,0 +1,43 @@
+H50   buy  50.00  sell  80.00  qty  10
+H15   buy  15.00  sell  25.00  qty  25
+H8    buy   8.00  sell  20.00  qty  22
+Hunu stock 57  value Rs.1051.00  avg Rs.18.4386
+Hunu purchases already recorded
+=== SUMMARY ===
+{"bank_balance":10008.43,"cash_in_hand":607.32,"owner_loan":10551.0,"stock_value":42570.0,"today_cash_in_hand":0,"today_deposits":0,"today_expenses":0,"today_purchases":0,"today_sales":0}
+
+=== SELLABLE ===
+[{"kind":"product","name":"Areca Nut","pid":2,"sell":20.0,"stock":554,"unit":"nut"},{"kind":"product","name":"Betel Leaf","pid":1,"sell":5.0,"stock":1177,"unit":"leaf"},{"bid":9,"kind":"batch","label":"H50","name":"Hunu H50","pid":3,"sell":80.0,"stock":10,"unit":"pcs"},{"bid":10,"kind":"batch","label":"H15","name":"Hunu H15","pid":3,"sell":25.0,"stock":25,"unit":"pcs"},{"bid":11,"kind":"batch","label":"H8","name":"Hunu H8","pid":3,"sell":20.0,"stock":22,"unit":"pcs"}]
+
+=== AUDIT ===
+{"bad":0,"balances":{"bank":10008.43,"cash":607.32},"checked_at":"2026-08-10 08:06","issues":[{"code":"no_expenses","fix":"Small daily costs (tea, transport) should be entered too.","msg":"3 trading days have no expenses recorded","sev":"info"}],"warn":0}
+
+=== BATCHES ===
+{'id': 3, 'product_id': 2, 'qty': 300, 'buy_price': 12.0, 'remaining': 54, 'sell_price': 20.0, 'label': ''}
+{'id': 4, 'product_id': 2, 'qty': 500, 'buy_price': 14.0, 'remaining': 500, 'sell_price': 20.0, 'label': ''}
+{'id': 7, 'product_id': 1, 'qty': 1000, 'buy_price': 3.0, 'remaining': 177, 'sell_price': 5.0, 'label': ''}
+{'id': 8, 'product_id': 1, 'qty': 1000, 'buy_price': 2.5, 'remaining': 1000, 'sell_price': 5.0, 'label': ''}
+{'id': 9, 'product_id': 3, 'qty': 10, 'buy_price': 50.0, 'remaining': 10, 'sell_price': 80.0, 'label': 'H50'}
+{'id': 10, 'product_id': 3, 'qty': 25, 'buy_price': 15.0, 'remaining': 25, 'sell_price': 25.0, 'label': 'H15'}
+{'id': 11, 'product_id': 3, 'qty': 22, 'buy_price': 8.0, 'remaining': 22, 'sell_price': 20.0, 'label': 'H8'}
+
+{'id': 1, 'name': 'Betel Leaf', 'buy_price': 2.5752, 'sell_price': 5.0, 'stock': 1177, 'pmode': 'fixed'}
+{'id': 2, 'name': 'Areca Nut', 'buy_price': 13.8051, 'sell_price': 20.0, 'stock': 554, 'pmode': 'fixed'}
+{'id': 3, 'name': 'Hunu', 'buy_price': 18.4386, 'sell_price': 100.0, 'stock': 57, 'pmode': 'batch'}
+
+{'id': 1, 'date': '2026-08-07', 'descr': '1000 betel @2.50 + 500 areca @14 (part)', 'amount': 8000.0, 'source': 'owner'}
+{'id': 2, 'date': '2026-08-07', 'descr': 'betel+areca (my money)', 'amount': 1500.0, 'source': 'owner'}
+{'id': 3, 'date': '2026-08-09', 'descr': 'Hunu H50: 10 @ Rs.50.00', 'amount': 500.0, 'source': 'owner'}
+{'id': 4, 'date': '2026-08-09', 'descr': 'Hunu H15: 25 @ Rs.15.00', 'amount': 375.0, 'source': 'owner'}
+{'id': 5, 'date': '2026-08-09', 'descr': 'Hunu H8: 22 @ Rs.8.00', 'amount': 176.0, 'source': 'owner'}
+
+{'id': 2, 'date': '2026-08-07', 'type': 'in', 'amount': 8000.0, 'source': 'direct', 'note': 'Stock purchase (owner cash)'}
+{'id': 3, 'date': '2026-08-07', 'type': 'in', 'amount': 1500.0, 'source': 'direct', 'note': 'Stock purchase (owner cash) part 2'}
+{'id': 4, 'date': '2026-08-09', 'type': 'in', 'amount': 500.0, 'source': 'direct', 'note': 'Hunu H50 purchase'}
+{'id': 5, 'date': '2026-08-09', 'type': 'in', 'amount': 375.0, 'source': 'direct', 'note': 'Hunu H15 purchase'}
+{'id': 6, 'date': '2026-08-09', 'type': 'in', 'amount': 176.0, 'source': 'direct', 'note': 'Hunu H8 purchase'}
+
+{'date': '2026-08-07', 'cash': 2179.92, 'bank': 6708.43, 'stock': 42895.5, 'owner_loan': 9500.0, 'capital': 42283.85, 'income': 5949.92, 'net_profit': 2471.92}
+{'date': '2026-08-08', 'cash': 3249.92, 'bank': 6708.43, 'stock': 42364.99, 'owner_loan': 9500.0, 'capital': 42823.34, 'income': 1070.0, 'net_profit': 465.0}
+{'date': '2026-08-09', 'cash': 607.32, 'bank': 10008.43, 'stock': 42820.04, 'owner_loan': 9500.0, 'capital': 43935.79, 'income': 1270.0, 'net_profit': 598.0}
+{'date': '2026-08-10', 'cash': 607.32, 'bank': 10008.43, 'stock': 42570.0, 'owner_loan': 10551.0, 'capital': 42634.75, 'income': 0.0, 'net_profit': 0.0}
