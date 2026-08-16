@@ -1,0 +1,6 @@
+/etc/nginx/sites-enabled/bots:2:    listen 8181;
+/etc/nginx/sites-enabled/bots:15:    listen 8182;
+/etc/nginx/sites-enabled/shop:2:    listen 8080;
+/etc/nginx/sites-enabled/slpa:14:    listen 443 ssl; # managed by Certbot
+/etc/nginx/sites-enabled/slpa:33:    listen 80;
+/etc/nginx/sites-enabled/vps:2:    listen 80;
