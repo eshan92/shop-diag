@@ -1,7 +1,0 @@
-208:.hsale-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
-862:        var inc=allSales.filter(function(s){return s.date===ds;}).reduce(function(a,s){return a+s.total;},0);
-1135:function loadHist(){
-1148:    var totInc=sales.reduce(function(a,s){return a+s.total;},0);
-1149:    var totPrf=sales.reduce(function(a,s){return a+s.profit;},0);
-1170:          '<div class="hsale-hdr"><span class="hsale-time">'+s.time+'</span><div style="display:flex;gap:10px;align-items:center"><span class="hsale-prf">+Rs.'+fmt(s.profit)+'</span><span class="hsale-amt">Rs.'+fmt(s.total)+'</span></div></div>'+
-1360:    var inc=sales.reduce(function(a,s){return a+s.total;},0);
