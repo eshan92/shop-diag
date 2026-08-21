@@ -1,0 +1,8 @@
+purchases rows: 5
+stock_in rows : 11
+
+('2026-08-09', 'stock', 'Hunu H8: 22 @ Rs.8.00', 176.0, 'owner', 'ok')
+('2026-08-09', 'stock', 'Hunu H15: 25 @ Rs.15.00', 375.0, 'owner', 'ok')
+('2026-08-09', 'stock', 'Hunu H50: 10 @ Rs.50.00', 500.0, 'owner', 'ok')
+('2026-08-07', 'stock', 'betel+areca (my money)', 1500.0, 'owner', 'ok')
+('2026-08-07', 'stock', '1000 betel @2.50 + 500 areca @14 (part)', 8000.0, 'owner', 'ok')
