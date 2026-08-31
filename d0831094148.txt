@@ -1,0 +1,33 @@
+-- loss_sale audit rows --
+(56, '2026-08-31 12:57:33', 'cashier1', 'loss_sale', '{"items": ["Hunu H15: sold Rs.25.00 (cost Rs.50.00)"]}')
+(55, '2026-08-31 12:51:53', 'cashier1', 'loss_sale', '{"items": ["Areca Nut: sold Rs.0.00 (cost Rs.0.00)"]}')
+(54, '2026-08-31 12:51:47', 'cashier1', 'loss_sale', '{"items": ["Areca Nut: sold Rs.0.00 (cost Rs.0.00)"]}')
+(53, '2026-08-30 10:49:15', 'cashier1', 'loss_sale', '{"items": ["Hunu H15: sold Rs.25.00 (cost Rs.50.00)"]}')
+(52, '2026-08-30 10:48:07', 'cashier1', 'loss_sale', '{"items": ["Hunu H15: sold Rs.25.00 (cost Rs.50.00)"]}')
+(51, '2026-08-30 10:47:44', 'cashier1', 'loss_sale', '{"items": ["Hunu H15: sold Rs.0.00 (cost Rs.0.00)"]}')
+(50, '2026-08-30 10:47:39', 'cashier1', 'loss_sale', '{"items": ["Hunu H15: sold Rs.0.00 (cost Rs.0.00)"]}')
+(49, '2026-08-26 18:44:49', 'cashier1', 'loss_sale', '{"items": ["Hunu H15: sold Rs.30.00 (cost Rs.50.00)"]}')
+(48, '2026-08-26 18:44:33', 'cashier1', 'loss_sale', '{"items": ["Hunu H15: sold Rs.0.00 (cost Rs.0.00)"]}')
+(47, '2026-08-26 18:44:15', 'cashier1', 'loss_sale', '{"items": ["Hunu H15: sold Rs.0.00 (cost Rs.0.00)"]}')
+(46, '2026-08-26 18:44:11', 'cashier1', 'loss_sale', '{"items": ["Hunu H15: sold Rs.0.00 (cost Rs.0.00)"]}')
+(43, '2026-08-23 17:35:04', 'cashier1', 'loss_sale', '{"items": ["Hunu H15: sold Rs.0.00 (cost Rs.0.00)"]}')
+
+-- all doSale wrappers --
+static/batch.js:71:  if (typeof window.doSale === 'function') {
+static/batch.js:72:    var _inner = window.doSale;
+static/batch.js:73:    window.doSale = function (items, cb) {
+static/money.js:74:  if(typeof window.doSale==='function'){
+static/money.js:75:    var _ds=window.doSale;
+static/money.js:76:    window.doSale=function(items,cb){
+static/order.js:6:// pricing, Bulath Wita) lives in doSale and is untouched.
+static/order.js:129:  if (typeof window.doSale === 'function') {
+static/order.js:130:    var _ds = window.doSale;
+static/order.js:131:    window.doSale = function (items, cb) {
+static/pmode.js:209:  if (typeof window.doSale === 'function') {
+static/pmode.js:210:    var _dsP = window.doSale;
+static/pmode.js:211:    window.doSale = function (items, cb) {
+static/prices.js:105:  if (typeof window.doSale === 'function') {
+static/prices.js:106:    var _ds = window.doSale;
+static/prices.js:107:    window.doSale = function (items, cb) {
+=== money.js / order.js buy handling ===
+static/money.js:47:      '<div style="font-size:10px;color:var(--text3)">Sell at buying price \u2014 zero profit</div></div>';
