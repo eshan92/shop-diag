@@ -1,0 +1,193 @@
+=== fifo_consume + costcheck + costprices ===
+        cost += take * b["buy_price"]
+        need -= take
+    if need > 0:
+        cost += need * fallback
+    return cost
+
+
+def fifo_consume(conn, pid, qty, fallback=0.0, batches_out=None):
+    """Take qty from the oldest batches. Returns total cost consumed.
+
+    If `batches_out` is a list, append (batch_id, qty_taken) for each batch
+    actually drawn from, so the caller can record exactly where the units
+    came from (needed to reverse a void into the right batch later).
+    """
+    need = qty
+    cost = 0.0
+    rows = conn.execute(
+        "SELECT id,remaining,buy_price FROM stock_batches "
+        "WHERE product_id=? AND remaining>0 ORDER BY id", (pid,)
+    ).fetchall()
+    for b in rows:
+        if need <= 0:
+            break
+        take = min(need, b["remaining"])
+        cost += take * b["buy_price"]
+        conn.execute("UPDATE stock_batches SET remaining=remaining-? WHERE id=?",
+                     (take, b["id"]))
+        if batches_out is not None:
+            batches_out.append((b["id"], take))
+        need -= take
+    if need > 0:                      # batches short of real stock
+        cost += need * fallback
+    _sync_avg(conn, pid, fallback)
+    return round(cost, 4)
+
+
+def fifo_return(conn, pid, qty):
+    """Put qty back into the newest consumed batches (used when voiding a sale).
+
+    This is a best-effort guess used only as a fallback for sale_items that
+    predate batch-level tracking (see fifo_return_precise). It does not know
+    which batch the units actually came from.
+    """
+    need = qty
+    rows = conn.execute(
+        "SELECT id,qty,remaining,buy_price FROM stock_batches "
+        "WHERE product_id=? ORDER BY id DESC", (pid,)
+    ).fetchall()
+    for b in rows:
+        if need <= 0:
+            break
+        room = b["qty"] - b["remaining"]
+        if room <= 0:
+            continue
+        give = min(need, room)
+        conn.execute("UPDATE stock_batches SET remaining=remaining+? WHERE id=?",
+                     (give, b["id"]))
+        need -= give
+    _sync_avg(conn, pid)
+
+
+def fifo_return_precise(conn, pid, sale_item_id, qty):
+    """Return stock to the exact batches a sale_item was drawn from, using
+    the sale_item_batches record written at consume time. Falls back to the
+    old newest-batch guess for sale_items recorded before this tracking
+    existed (no rows found)."""
+    rows = conn.execute(
+        "SELECT batch_id, qty FROM sale_item_batches WHERE sale_item_id=?",
+        (sale_item_id,),
+    ).fetchall()
+    if not rows:
+        fifo_return(conn, pid, qty)
+        return
+    for r in rows:
+        conn.execute("UPDATE stock_batches SET remaining=remaining+? WHERE id=?",
+                     (r["qty"], r["batch_id"]))
+    _sync_avg(conn, pid)
+
+
+# ---------------- routes ----------------
+@bp.route("/api/batch/list")
+def batch_list():
+    """Admin view: batches grouped per product."""
+    conn = _db()
+    prods = conn.execute("SELECT id,name,unit,stock,sell_price FROM products ORDER BY name").fetchall()
+    out = []
+    for p in prods:
+        bs = conn.execute(
+            "SELECT id,date,qty,buy_price,remaining,supplier FROM stock_batches "
+            "WHERE product_id=? ORDER BY id", (p["id"],)
+        ).fetchall()
+        rem_val = sum(b["remaining"] * b["buy_price"] for b in bs)
+        rem_qty = sum(b["remaining"] for b in bs)
+        out.append({
+            "id": p["id"], "name": p["name"], "unit": p["unit"],
+            "stock": p["stock"], "sell_price": p["sell_price"],
+            "avg_cost": round(rem_val / rem_qty, 2) if rem_qty else 0,
+            "value": round(rem_val, 2),
+            "batches": [dict(b) for b in bs],
+        })
+    conn.close()
+    return jsonify(out)
+
+
+@bp.route("/api/batch/costcheck", methods=["POST"])
+def costcheck():
+    """Server-side below-cost check. Returns names only - never the cost itself."""
+    data = request.json or {}
+    below = []
+    high = []
+    conn = _db()
+    for it in (data.get("items") or [])[:40]:
+        try:
+            sp = float(it.get("sp", 0))
+            rid = int(it.get("id", 0))
+            q = max(1, int(it.get("qty", 1)))
+        except (TypeError, ValueError):
+            continue
+        if it.get("type") == "lot":
+            r = conn.execute("SELECT buy FROM lots WHERE id=?", (rid,)).fetchone()
+            c = r["buy"] if r else None
+        else:
+            r = conn.execute("SELECT buy_price FROM products WHERE id=?", (rid,)).fetchone()
+            # what this sale will ACTUALLY cost, not the weighted average
+            c = (fifo_cost_preview(conn, rid, q, r["buy_price"]) / q) if r else None
+        if c is not None and c > 0:
+            if sp <= c + 0.0001:
+                below.append(str(it.get("name", ""))[:40])
+            elif sp > c * HIGH_MULT:
+                high.append({"name": str(it.get("name", ""))[:40],
+                             "sp": round(sp, 2)})
+    conn.close()
+    return jsonify({"below": below, "high": high})
+
+
+@bp.route("/api/batch/costprices", methods=["POST"])
+def costprices():
+    """Cost prices for Bulath Wita mode (selling at cost, so cost is the price)."""
+    data = request.json or {}
+    out = {}
+    conn = _db()
+    for it in (data.get("items") or [])[:40]:
+        try:
+            rid = int(it.get("id", 0))
+            q = max(1, int(it.get("qty", 1)))
+        except (TypeError, ValueError):
+            continue
+        if it.get("type") == "lot":
+            r = conn.execute("SELECT buy FROM lots WHERE id=?", (rid,)).fetchone()
+            if r:
+                out["lot:" + str(rid)] = round(r["buy"], 2)
+        else:
+            r = conn.execute("SELECT buy_price FROM products WHERE id=?", (rid,)).fetchone()
+            if r:
+                fb = r["buy_price"]
+                out["product:" + str(rid)] = round(
+                    fifo_cost_preview(conn, rid, q, fb) / q, 2)
+    conn.close()
+    return jsonify(out)
+
+
+=== where cart buy is set ===
+514:            <div class="fm"><label>Buying Price / piece (Rs.)</label><input type="number" id="lbuy" placeholder="e.g. 15" min="1" oninput="lprev()"><span style="font-size:10px;color:var(--text3)">Buy 15 → D15-A, D15-B ...</span></div>
+734:function lname(lot){var t=lot.ltype||'N';return (t==='K'?'K-':t==='P'?'P-':'')+'D'+lot.buy+'-'+lot.suffix;}
+902:      return '<div class="'+cl+'" onclick="'+(empty?'':'aLot('+lot.id+','+lot.buy+','+lot.sell+',\''+lname(lot)+'\')')+'">'+
+904:        '<div class="ls">Buy: Rs.'+lot.buy+'/pc</div><div class="lp">'+lot.pieces+' pcs</div>'+
+910:      return '<button class="btn bgh bsm" onclick="aProd('+p.id+',\''+p.name+'\','+p.buy_price+','+p.sell_price+')"'+(p.stock<=0?' disabled style="opacity:.4"':'')+'>'+p.name+' Rs.'+fmt(p.sell_price)+'</button>';
+915:function aLot(lid,buy,sell,name){
+919:  else{sItems.push({type:'lot',lid:lid,name:name,buy:buy,sp:sell,qty:1});}
+922:function aProd(pid,name,buy,sell){
+926:  else{sItems.push({type:'product',pid:pid,name:name,buy:buy,sp:sell,qty:1});}
+936:    html+='<div class="sale-row"><span class="tag">'+it.name+'</span><span style="font-size:10px;color:var(--text3);flex:1">Buy:'+fmt(it.buy)+'</span><span style="font-size:10px;color:var(--text3)">Rs.</span>'+
+973:      return '<div class="'+cl+'"><div class="ldot" style="'+dot+'"></div><div class="ln">'+lname(lot)+'</div><div class="ls">Buy: Rs.'+lot.buy+'/pc</div><div class="lp">'+lot.pieces+' pcs</div><div class="lsp">Sell: Rs.'+lot.sell+'</div><div class="ld">Added: '+lot.date+'</div></div>';
+978:      return '<tr><td><span class="tag">'+lname(lot)+'</span></td><td class="mn">Rs.'+fmt(lot.buy)+'</td><td class="mn gr">Rs.'+fmt(lot.sell)+'</td><td class="mn bo">'+lot.pieces+'</td><td class="mn" style="font-size:10px">'+lot.date+'</td><td class="mn">Rs.'+fmt(lot.pieces*lot.buy)+'</td><td><span class="badge '+bs+'">'+(empty?'Empty':low?'Low':'OK')+'</span></td><td style="display:flex;gap:4px"><button class="btn bp bsm" onclick="openLotEdit('+lot.id+',\''+lname(lot)+'\','+lot.sell+','+lot.pieces+','+lot.min_pieces+')">Edit</button><button class="btn bgh bsm" onclick="delLot('+lot.id+')">Del</button></td></tr>';
+991:      return '<tr><td><span class="tag">'+lname(lot)+'</span></td><td class="mn">Rs.'+fmt(lot.buy)+'</td><td class="mn">'+lot.pieces+'</td><td class="mn" style="font-size:10px">'+lot.date+'</td></tr>';
+997:  var buy=parseFloat(document.getElementById('lbuy').value);
+999:  if(buy){
+1002:      var cnt=lots.filter(function(l){return l.buy===buy;}).length;
+1003:      document.getElementById('pvn').textContent='D'+buy+'-'+String.fromCharCode(65+cnt);
+1004:      document.getElementById('pvi').textContent='Buy price: Rs.'+buy+'/piece';
+1010:  var buy=parseFloat(document.getElementById('lbuy').value);
+1015:  if(!buy||!sell||!pcs){toast('Fill required fields!',false);return;}
+1019:  api('POST','/api/lots',{buy:buy,sell:sell,pieces:pcs,min_pieces:mn,note:note,source:lsrc,by:lby,ltype:(document.querySelector('#ltype .ltsel')?document.querySelector('#ltype .ltsel').dataset.v:'N')}).then(function(d){
+1022:      ['lbuy','lsell','lpieces','lmin','lnote'].forEach(function(id){document.getElementById(id).value='';});
+1038:      return '<tr><td class="bo">'+p.name+'</td><td>'+p.unit+'</td><td class="mn">Rs.'+fmt(p.buy_price)+'</td><td class="mn gr">Rs.'+fmt(p.sell_price)+'</td><td class="mn '+(low?'rd':'gr')+'">'+p.stock+'</td><td class="mn">Rs.'+fmt(p.stock*p.buy_price)+'</td><td><span class="badge '+(low?'br':'bg')+'">'+(low?'Low':'OK')+'</span></td></tr>';
+1179:          return '<tr><td><span class="tag">'+x.name+'</span></td><td class="mn">Rs.'+fmt(x.buy_price)+'</td><td class="mn gr">Rs.'+fmt(x.sell_price)+'</td><td class="mn">'+x.qty+'</td><td class="mn bl">Rs.'+fmt(x.subtotal)+'</td><td class="mn gr">Rs.'+fmt(x.profit)+'</td></tr>';
+1320:      return '<div class="'+cls+'" onclick="'+(empty?'':'cALot('+lot.id+','+lot.buy+','+lot.sell+',\''+lname(lot)+'\')')+'">'+
+1332:      return '<button class="cob" onclick="cAProd('+p.id+',\''+p.name+'\','+p.buy_price+','+p.sell_price+')"'+(p.stock<=0?' disabled':'')+'>'+
+1338:function cALot(lid,buy,sell,name){
+1341:  if(ex){ex.qty++;}else{cItems.push({type:'lot',lid:lid,name:name,buy:buy,sp:sell,qty:1});}
+1344:function cAProd(pid,name,buy,sell){
+1347:  if(ex){ex.qty++;}else{cItems.push({type:'product',pid:pid,name:name,buy:buy,sp:sell,qty:1});}
