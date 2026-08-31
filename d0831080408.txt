@@ -1,0 +1,107 @@
+=== Mon Aug 31 01:34:08 PM +0530 2026 ===
+--- files ---
+-rw------- 1 root root  7275 2026-08-21 16:59 CLAUDE.md
+-rw-r--r-- 1 root root 86365 2026-08-25 20:08 index.html
+-rw-r--r-- 1 root root 62427 2026-08-25 19:59 server.py
+-rw-r--r-- 1 root root  6465 2026-08-16 13:05 shop_auth.py
+-rw------- 1 root root 38818 2026-08-25 20:09 SHOPLOG.md
+--- service ---
+active
+● shop.service - Tobacco shop app
+     Loaded: loaded (/etc/systemd/system/shop.service; enabled; preset: enabled)
+    Drop-In: /etc/systemd/system/shop.service.d
+             └─tz.conf
+     Active: active (running) since Wed 2026-08-26 06:33:53 UTC; 5 days ago
+   Main PID: 769700 (python3)
+      Tasks: 4 (limit: 1001)
+     Memory: 33.1M (peak: 48.5M swap: 26.3M swap peak: 27.4M)
+--- SHOPLOG tail ---
+---
+
+## 2026-08-21
+
+### Cash position
+
+```
+cash_opening        815.68   <- confirmed WRONG, still in place
++ sales          33,605.32
+- purchases (cash) 9,860.00
+- bank deposits  25,600.00
+= -1,039.00        (what the app showed)
+physical             155.00
+gap                1,194.00
+
+with cash_opening removed:  -1,854.68 vs 155.00
+UNEXPLAINED:               2,009.68
+```
+
+The system understates cash, which points to missing income rather than
+overstated outflow.
+
+### Applied via `fix_0821.py`
+
+Backup written to `shop.db.bak-20260821-162018` before any change.
+
+- Backfilled 6 purchase rows for `stock_in` 8–13, Rs. 9,860 total,
+  `source='cash'`: Aug 18 areca 850 / 210 / 2,400, Aug 18 betel 2,400,
+  Aug 20 areca 1,200, Aug 21 betel 2,800.
+- Corrected stale lot sell prices, both confirmed against the ledger:
+  lot 29 D60-A 100 → 150, lot 30 K-D75-A 150 → 200. D130-A already correct.
+
+The audit_log rows this script wrote carry **UTC** timestamps (`16:20:18`),
+not Colombo. Cosmetic, but see the timezone note below.
+
+### Earlier findings, still valid
+
+- **Aug 14, 15, 16 have no sales rows** — the old single-threaded lockup.
+  Do not create rows for those dates; see the Aug 14–17 section above.
+- **`cash_opening` = 815.68 was a stock-count error**, confirmed by Eshan.
+  Still to be removed, but not until the 2,009.68 is understood — plugging a
+  number was exactly what created this confusion on Aug 10.
+- Betel sold at five different unit prices on Aug 21 (3, 5, 6, 6.25, 7).
+  Costing correct in every case; likely round-rupee sales.
+- **Shell TZ is UTC, app TZ is Colombo** (5h30m apart). The systemd override
+  covers the Flask service only. Maintenance scripts must set
+  `TZ=Asia/Colombo` or the audit trail mixes timezones.
+- **App sidebar reports v3.2**, though notes elsewhere say v3.6. Confirm what
+  is actually deployed before assuming a feature exists.
+
+---
+
+## Open items
+
+| # | Item | Status |
+|---|------|--------|
+| 1 | ~~BW cost price bug~~ | **fixed 08-22 — needs browser test** |
+| 2 | Add Stock writes no purchase row | **open — corrupting data daily** |
+| 3 | ~~History day totals include voided sales~~ | **fixed 08-22** |
+| 4 | Round-rupee entries store cents (100.02) | open |
+| 5 | Rs. 2,009.68 cash gap | open — needs Aug 15 total + physical count |
+| 6 | `cash_opening` 815.68 → 0 | waiting on #5 |
+| 7 | Aug 18 missing ~410 of sales | open |
+| 8 | Aug 19 has ~345 of sales not in the ledger | open |
+| 9 | ~~Double-submit on sale button~~ | closed 08-22 — was the BW price bug |
+| 10 | `auth_enforce` = 0, session auth is OFF | open |
+| 11 | `admin_pass` / `cashier_pass` plaintext in `settings` | open |
+| 12 | Areca 6-for-100 entered as 90 | open |
+| 13 | Shell TZ is UTC | open |
+| 14 | DB backup to Telegram | not started |
+
+---
+
+## How to use this file
+
+Add a dated section at the top each time something changes. Include the
+numbers, not just the description — a future session can verify numbers but
+cannot verify vague recollections. Record what was tried and failed, not only
+what worked. When an open item is closed, move it out of the table into a
+dated entry saying how.
+--- settings (no secrets) ---
+Command 'sqlite3' not found, but can be installed with:
+apt install sqlite3
+--- tables ---
+Command 'sqlite3' not found, but can be installed with:
+apt install sqlite3
+--- counts ---
+Command 'sqlite3' not found, but can be installed with:
+apt install sqlite3
