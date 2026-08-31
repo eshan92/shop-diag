@@ -1,0 +1,16 @@
+=== doc files ===
+-rw------- 1 root root  7275 2026-08-21 16:59 CLAUDE.md
+-rw------- 1 root root 38818 2026-08-25 20:09 SHOPLOG.md
+=== CLAUDE.md headings ===
+1:# Tobacco Shop Management App
+9:## ⚠️ CRITICAL — DO NOT TOUCH
+23:## SESSION BRIDGE — read this before starting work
+55:## Infrastructure
+78:## Database Schema
+107:## Accounting Rules — non-negotiable
+145:## Known bugs already fixed — don't regress
+157:## Working conventions
+175:## Current open items
+=== secret scan (count only) ===
+5
+=== mermaid/flow? ===
