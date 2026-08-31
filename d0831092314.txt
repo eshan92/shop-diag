@@ -1,0 +1,4 @@
+static/batch.js:46:                '<span style="flex:1">' + b.remaining + '/' + b.qty + ' @ Rs.' + fmt(b.buy_price) + '</span>' +
+static/batch.js:84:            if (m[k] != null) { it.buy = m[k]; }
+static/batch.js:138:            items: d.below.map(function (n) { return { name: n, sp: 0, buy: 0 }; })
+static/money.js:47:      '<div style="font-size:10px;color:var(--text3)">Sell at buying price \u2014 zero profit</div></div>';
