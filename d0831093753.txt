@@ -1,0 +1,45 @@
+      if (!list.length) { el.innerHTML = '<div class="cemp">No stock</div>'; return; }
+      el.innerHTML = list.map(function (x, i) {
+        return '<button class="cob" onclick="cPick(' + i + ')">' +
+          '<div class="on">' + esc(x.name) + '</div>' +
+          '<div class="op">Rs.' + fmt(x.sell) + '</div>' +
+          '<div style="font-size:9px;color:var(--text3)">' + x.stock + ' ' + esc(x.unit || '') + '</div>' +
+          '</button>';
+      }).join('');
+      window.__sellable = list;
+    }).catch(function () {});
+  };
+
+  window.cPick = function (i) {
+    var x = (window.__sellable || [])[i];
+    if (!x) return;
+    if (x.kind === 'batch') {
+      for (var j = 0; j < cItems.length; j++) {
+        if (cItems[j].bid === x.bid) {
+          if (cItems[j].qty >= x.stock) { tErr('Only ' + x.stock + ' left in ' + x.label); return; }
+          cItems[j].qty++; rCOrder(); return;
+        }
+      }
+      cItems.push({ type: 'product', pid: x.pid, bid: x.bid, name: x.name,
+                    buy: 0, sp: x.sell, qty: 1, max: x.stock });
+      rCOrder();
+      return;
+    }
+    cAProd(x.pid, x.name, 0, x.sell);
+  };
+
+  // ---------- 2. Stock page: batch editor ----------
+=== load order ===
+1459:<script src="/static/bank.js?v=501"></script>
+1460:<script src="/static/users.js?v=901"></script>
+1461:<script src="/static/prices.js?v=503"></script>
+1462:<script src="/static/lots.js?v=500"></script>
+1463:<script src="/static/extras.js?v=500"></script>
+1464:<script src="/static/report.js?v=500"></script>
+1465:<script src="/static/money.js?v=505"></script>
+1466:<script src="/static/growth.js?v=500"></script>
+1467:<script src="/static/batch.js?v=503"></script>
+1468:<script src="/static/tools.js?v=901"></script>
+1469:<script src="/static/pmode.js?v=504"></script>
+1470:<script src="/static/order.js?v=800"></script>
+1471:<script src="/static/auth.js?v=1000"></script>
