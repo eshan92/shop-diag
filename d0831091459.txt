@@ -1,2 +1,0 @@
-static/batch.js:134:        fetch('/api/bank/losswarn', {
-static/prices.js:130:        fetch('/api/bank/losswarn', {

@@ -1,0 +1,73 @@
+=== shop_pmode.py ===
+8:# Batch labels are built from the buy price: H50, H25, H22. Buying again at a
+9:# price that already exists reuses that label; the batch rows stay separate so
+21:def _db():
+27:def _today():
+31:def _migrate():
+39:    if "label" not in bc:
+40:        conn.execute("ALTER TABLE stock_batches ADD COLUMN label TEXT DEFAULT ''")
+54:def make_label(name, buy):
+61:def set_mode():
+77:        # give existing batches a label and a sell price so nothing is left blank
+79:            "SELECT id,buy_price,sell_price,label FROM stock_batches WHERE product_id=?", (pid,)
+81:            lab = b["label"] or make_label(p["name"], b["buy_price"])
+83:            conn.execute("UPDATE stock_batches SET label=?, sell_price=? WHERE id=?",
+91:def add_or_edit_batch():
+101:            buy = round(float(data.get("buy_price", 0)), 2)
+113:        label = str(data.get("label", "")).strip() or make_label(p["name"], buy)
+115:            "INSERT INTO stock_batches (product_id,date,qty,buy_price,remaining,supplier,sell_price,label) "
+117:            (pid, _today(), qty, buy, qty, str(data.get("supplier", ""))[:60], sell, label),
+122:        return jsonify({"ok": True, "label": label})
+125:        bid = int(data.get("batch_id", 0))
+145:        label = str(data.get("label", b["label"])).strip()[:20]
+146:        conn.execute("UPDATE stock_batches SET sell_price=?, label=? WHERE id=?",
+147:                     (sell, label, bid))
+168:def sellable():
+182:            "SELECT id,label,buy_price,sell_price,remaining FROM stock_batches "
+186:                        "name": p["name"] + " " + (b["label"] or ""),
+187:                        "label": b["label"], "unit": p["unit"],
+193:def consume_batch(conn, bid, qty):
+199:        return 0, False, "Only %d left in %s" % (b["remaining"], b["label"] or "batch")
+202:    return round(b["buy_price"] * qty, 4), True, ""
+205:def return_batch(conn, bid, qty):
+=== pmode.js ===
+1:// pmode.js -- Step 2c: batch-priced items in the cashier screen, Stock page
+2:// batch editor, and a sell-price field on Add Stock for batch-mode items.
+35:    if (x.kind === 'batch') {
+38:          if (cItems[j].qty >= x.stock) { tErr('Only ' + x.stock + ' left in ' + x.label); return; }
+43:                    buy: 0, sp: x.sell, qty: 1, max: x.stock });
+50:  // ---------- 2. Stock page: batch editor ----------
+51:  function batchEditor() {
+63:      fetch('/api/batch/list').then(function (r) { return r.json(); })
+69:        'Fixed = one selling price. Batch = each batch has its own buy and sell price.</div>' +
+71:          var bm = (p.pmode || 'fixed') === 'batch';
+72:          var bs = ((byId[p.id] || {}).batches || []).filter(function (b) { return b.remaining > 0; });
+77:            '<button onclick="pmToggle(' + p.id + ',\'' + (bm ? 'fixed' : 'batch') + '\')" ' +
+83:                '<b style="color:var(--accent);min-width:44px">' + esc(b.label || '-') + '</b>' +
+84:                '<span style="flex:1">' + b.remaining + '/' + b.qty + ' \u00b7 buy Rs.' + fmt(b.buy_price) +
+86:                '<button onclick="pmEdit(' + b.id + ',' + b.sell_price + ',\'' + esc(b.label || '') + '\')" ' +
+90:            }).join('') + '<button class="btn bs" style="font-size:10px;padding:4px 10px;margin:4px 0 0 10px" onclick="pmNew(' + p.id + ',\'' + esc(p.name) + '\')">+ Add batch</button>' : '') +
+100:        if (d.ok) { tOK('Switched to ' + mode + ' pricing'); batchEditor(); }
+105:  window.pmEdit = function (bid, sell, label) {
+107:    var ov = modal('<div style="font-weight:700;margin-bottom:10px">Edit batch</div>' +
+108:      '<label style="font-size:11px;color:var(--text3)">Label</label>' +
+109:      '<input id="peL" value="' + esc(label) + '" style="' + st + '">' +
+110:      '<label style="font-size:11px;color:var(--text3)">Selling price</label>' +
+116:      fetch('/api/pmode/batch', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+117:        body: JSON.stringify({ action: 'edit', batch_id: bid,
+118:          sell_price: ov.querySelector('#peS').value, label: ov.querySelector('#peL').value }) })
+121:          if (d.ok) { tOK('Batch updated'); batchEditor(); } else tErr(d.error || 'Failed');
+127:    var ov = modal('<div style="font-weight:700;color:#c0392b;margin-bottom:8px">Remove this batch?</div>' +
+128:      '<div style="font-size:12px;color:var(--text3);margin-bottom:12px">Only untouched batches can be removed.</div>' +
+133:      fetch('/api/pmode/batch', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+134:        body: JSON.stringify({ action: 'delete', batch_id: bid }) })
+137:          if (d.ok) { tOK('Batch removed'); batchEditor(); } else tErr(d.error || 'Failed');
+144:    var ov = modal('<div style="font-weight:700;margin-bottom:10px">New batch \u2014 ' + esc(name) + '</div>' +
+145:      '<label style="font-size:11px;color:var(--text3)">Quantity</label>' +
+147:      '<label style="font-size:11px;color:var(--text3)">Buy price / unit</label>' +
+149:      '<label style="font-size:11px;color:var(--text3)">Sell price / unit</label>' +
+151:      '<label style="font-size:11px;color:var(--text3)">Paid from</label>' +
+172:      if (b > 0 && sp < b) { m.textContent = 'Sell price is below buy price.'; return; }
+176:      fetch('/api/pmode/batch', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+177:        body: JSON.stringify({ action: 'add', product_id: pid, qty: q, buy_price: b, sell_price: sp }) })
+187:          tOK('Batch ' + d.label + ' added');
