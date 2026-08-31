@@ -1,0 +1,61 @@
+@bp.route("/api/bank/lastprices")
+def last_prices():
+    conn = _db()
+    rows = conn.execute(
+        "SELECT ref_id, sell_price FROM ("
+        "  SELECT si.ref_id, si.sell_price, si.id, "
+        "         MAX(si.id) OVER (PARTITION BY si.ref_id) mx "
+        "  FROM sale_items si JOIN sales s ON s.id = si.sale_id "
+        "  WHERE si.type='product' AND COALESCE(s.status,'ok')!='voided'"
+        ") WHERE id = mx"
+    ).fetchall()
+    conn.close()
+    return jsonify({str(r["ref_id"]): r["sell_price"] for r in rows})
+
+
+@bp.route("/api/bank/losswarn", methods=["POST"])
+def loss_warn():
+    data = request.json or {}
+    by = str(data.get("by", "unknown"))[:40]
+    items = data.get("items", [])[:20]
+    lines = []
+    for it in items:
+        try:
+            lines.append("%s: sold Rs.%.2f (cost Rs.%.2f)" % (
+                str(it.get("name", "?"))[:40], float(it.get("sp", 0)), float(it.get("buy", 0))))
+        except (TypeError, ValueError):
+            pass
+    try:
+        from shop_users import audit
+        audit(by, "loss_sale", {"items": lines})
+    except Exception:
+        pass
+    _tg("\U0001f53b <b>Loss Sale Confirmed</b>\nBy: %s\n%s\n%s %s"
+        % (by, "\n".join(lines), _today(), _now()))
+    return jsonify({"ok": True})
+
+
+@bp.route("/api/bank/lotype", methods=["POST"])
+def lot_type():
+    data = request.json or {}
+    lid = int(data.get("id", 0))
+    lt = str(data.get("ltype", "N")).upper()[:1]
+    if lt not in ("N", "K", "P"):
+        return jsonify({"ok": False, "error": "Type must be N/K/P"}), 400
+    conn = _db()
+    r = conn.execute("SELECT id FROM lots WHERE id=?", (lid,)).fetchone()
+    if not r:
+        conn.close()
+        return jsonify({"ok": False, "error": "Lot not found"}), 404
+    conn.execute("UPDATE lots SET ltype=? WHERE id=?", (lt, lid))
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True})
+
+
+@bp.route("/api/bank/depvoid", methods=["POST"])
+def dep_void():
+    data = request.json or {}
+    did = int(data.get("id", 0))
+    reason = str(data.get("reason", "")).strip()[:200]
+    by = str(data.get("by", "unknown"))[:40]
