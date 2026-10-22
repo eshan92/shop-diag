@@ -1,0 +1,8 @@
+playwright>=1.40
+edge-tts>=6.1
+numpy
+pyyaml
+pillow
+# Offline voice (Meta MMS-TTS). Optional, large download; see README:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install transformers

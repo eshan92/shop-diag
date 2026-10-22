@@ -1,0 +1,38 @@
+**TITLE:** Why UAE Visa Rules Changed for Sri Lankan Workers
+
+**COLOR PALETTE:**
+* Background: Deep Black (#0D0D0D)
+* Accent: Netflix Red (#E50914)
+* Text: White (#FFFFFF)
+* Secondary: Light Gray (#B0B0B0)
+
+## SCENES
+
+**Scene 1 (0-4s) - Hook**
+* **On-screen text:** "UAE Changes Visa Rules" | "What it means for you"
+* **Visual:** Map pin dropping on Dubai
+* **Animation:** Text zooms in with a punch
+* **Transition:** Quick zoom
+
+**Scene 2 (4-9s)**
+* **On-screen text:** "Over 100,000 Sri Lankans work in the UAE"
+* **Visual:** Crowd of workers icons
+* **Animation:** Slide in from right
+* **Transition:** Wipe left
+
+**Scene 3 (9-14s)**
+* **On-screen text:** "New rules from January 2026"
+* **Visual:** Calendar flipping
+* **Animation:** Typewriter effect
+* **Transition:** Fade
+
+**Scene 4 (14-18s)**
+* **On-screen text:** "Follow for more updates"
+* **Visual:** Subscribe button with bell
+* **Animation:** Bounce
+* **Transition:** Fade
+
+## VOICEOVER SCRIPT
+The UAE has announced changes to its visa rules. Here is what it means for Sri Lankan workers. More than one hundred thousand Sri Lankans currently work in the Emirates. The new rules take effect from January. Employers must register contracts online. Subscribe for more updates.
+
+SOURCES: Gulf News, The Daily Star

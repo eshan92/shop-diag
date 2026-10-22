@@ -1,0 +1,7 @@
+output/
+cache/
+node_modules/
+package-lock.json
+__pycache__/
+music/*
+!music/README.md

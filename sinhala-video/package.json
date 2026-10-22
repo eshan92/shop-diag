@@ -1,0 +1,6 @@
+{
+  "name": "sinhala-video-fonts",
+  "private": true,
+  "description": "Only used to fetch the Noto Sans Sinhala font files (already copied to assets/fonts).",
+  "dependencies": { "@fontsource/noto-sans-sinhala": "^5.0.0" }
+}

@@ -1,0 +1,56 @@
+# Sinhala explainer video pipeline - settings
+# Every value here can be left as-is; edit to taste.
+
+channel_tag: "සිංහල පුවත් පැහැදිලි කිරීම"   # top-left tag on every frame
+subscribe_text: "SUBSCRIBE"                  # text on the final-scene button
+sources_label: "මූලාශ්‍ර"                     # prefix for the sources credit line
+
+tts:
+  # Engines are tried in this order. "edge" needs internet,
+  # "mms" (Meta MMS-TTS) and "espeak" work offline.
+  # --offline removes "edge" from the list.
+  engine_order: [edge, mms, espeak]
+
+  edge:
+    voice: si-LK-ThiliniNeural    # or si-LK-SameeraNeural (male)
+    rate: "+0%"                   # e.g. "-10%" slower, "+15%" faster
+    pitch: "+0Hz"                 # e.g. "-5Hz", "+10Hz"
+    volume: "+0%"
+    proxy: null                   # e.g. "http://127.0.0.1:8080" if you need one
+
+  mms:
+    model: facebook/mms-tts-sin   # downloaded once into the Hugging Face cache
+    speaking_rate: 1.0            # >1 faster, <1 slower
+    seed: 1234                    # MMS is stochastic; fixed seed = repeatable audio
+
+  espeak:                         # last-resort robotic voice (apt install espeak-ng)
+    voice: si
+    speed: 140
+
+timing:
+  fps: 30
+  padding: 0.6           # seconds added after each scene's narration
+  min_scene: 2.5         # minimum scene length (seconds)
+  no_narration_scene: 3.0
+  voice_lead_in: 0.15    # voice starts this long after the scene cut
+  transition: 0.5        # scene transition length (seconds)
+  outro_hold: 1.5        # extra seconds on the last scene (subscribe button)
+
+subtitles:
+  enabled: true
+  max_words: 4           # words per subtitle chunk
+  max_chars: 32          # ...or fewer if the chunk gets long
+
+audio:
+  music_duck: 0.15       # music volume under the voice (0.15 = 15%)
+  music_level_db: -20    # music bed loudness (RMS dBFS) before ducking
+  fade_in: 1.0
+  fade_out: 2.0
+  target_lufs: -14       # YouTube loudness target
+  true_peak: -1.5
+
+render:
+  jpeg_quality: 92
+  crf: 18
+  preset: medium         # x264 preset: veryfast..slow
+  workers: 0             # parallel browser workers; 0 = auto (CPU count, max 4)
