@@ -35,7 +35,7 @@ body { font-family: var(--font); color: var(--text); -webkit-font-smoothing: ant
     linear-gradient(to bottom, rgba(255,255,255,.07) 1px, transparent 1px);
   background-size: calc(var(--u) * 8) calc(var(--u) * 8); }
 #glow { position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--accent) 22%, transparent) 0%, transparent 60%); }
+  background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--accent2, var(--accent)) 30%, transparent) 0%, transparent 60%); }
 #vignette { position: absolute; inset: 0; pointer-events: none;
   background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,.78) 100%); }
 

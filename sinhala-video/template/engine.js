@@ -44,7 +44,8 @@
       if (sc.sub) sc.sub.style.fontSize = (M.sub * k) + 'px';
       if (sc.note) sc.note.style.fontSize = (M.note * k) + 'px';
       if (sc.icon) sc.icon.style.setProperty('--icon', (M.icon * k) + 'px');
-      if (sc.final) { sc.src.style.fontSize = (M.src * k) + 'px'; sc.btn.style.fontSize = (M.btn * k) + 'px'; }
+      if (sc.src) sc.src.style.fontSize = (M.src * k) + 'px';
+      if (sc.btn) sc.btn.style.fontSize = (M.btn * k) + 'px';
       c.style.gap = (3 * M.u * k) + 'px';
     };
     let hk = 1, k = 1;
@@ -166,8 +167,8 @@
     const subKind = anim === 'typewriter' || anim === 'zoom' || anim === 'bounce' ? 'fade' : anim;
     enter(sc.sub, subKind, lt, after, M);
     enter(sc.note, 'fade', lt, after + 0.25, M);
-    if (sc.final) {
-      enter(sc.src, 'fade', lt, after + 0.4, M);
+    if (sc.final) enter(sc.src, 'fade', lt, after + 0.4, M);
+    if (sc.btn) {
       const b = lt - (after + 0.6);
       const pop = back(b / 0.5);
       // bounce every 2 s after it pops in

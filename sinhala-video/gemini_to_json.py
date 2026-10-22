@@ -37,13 +37,18 @@ ICON_WORDS = [  # first match wins
     ("phone", r"phone|call|mobile|smartphone|whatsapp|sms|app\b|message|text message"),
     ("calendar", r"calendar|date|deadline|year|month|week|day|schedule|time ?line|clock"),
     ("pin", r"\bpin\b|location|map\b|city|place|address|district|province|airport"),
-    ("scale", r"law|court|justice|legal|scale|balance|judge|rule|regulation|fine|penalt|rights"),
+    ("scale", r"law|court|justice|legal|scale|balance|judge|rule|regulation|fine|penalt|rights|"
+              r"pendulum|sway|pressure|strain|weigh"),
     ("globe", r"globe|world|international|countr|global|abroad|foreign|earth"),
-    ("people", r"people|crowd|worker|citizen|famil|population|person|men|women|student|migrant|users?\b"),
+    ("people", r"diplomat|negotiat|talks|meeting|summit|handshake|delegat|people|crowd|worker|citizen|famil|population|person|\bmen\b|\bwomen\b|student|migrant|users?\b"),
 ]
 
 
+INVISIBLE = re.compile("[\u200b\u2060\ufeff\u00ad]")  # NOT \u200c/\u200d: Sinhala needs those
+
+
 def clean(line: str) -> str:
+    line = INVISIBLE.sub("", line)
     line = re.sub(r"^[#>\s]*", "", line)               # headings / quotes
     line = re.sub(r"^\s*[-*•]\s+", "", line)           # bullets
     return line.replace("**", "").replace("__", "").strip()
@@ -98,7 +103,7 @@ def parse_palette(text: str) -> dict:
     roles = (("bg", r"background|\bbg\b|base"), ("accent", r"accent|highlight|primary|pop"),
              ("text", r"\btext\b|font|headline|foreground|main"), ("muted", r"muted|secondary|grey|gray|sub"))
     # one colour per item: items are separated by newlines, commas or semicolons
-    for item in re.split(r"[\n,;]", text):
+    for item in re.split(r"[\n,;|]", text):
         m = re.search(r"#[0-9A-Fa-f]{6}\b|#[0-9A-Fa-f]{3}\b", item)
         if not m:
             continue
@@ -109,16 +114,44 @@ def parse_palette(text: str) -> dict:
                 break
         else:
             unnamed.append(hexv)
-    for key in ("bg", "accent", "text", "muted"):  # unlabelled colours fill the gaps in order
+    # unlabelled colours: bg = darkest, text = lightest, muted = greyest,
+    # accent = the most vivid colour that still stands out on the background
+    def pick(key, score):
         if key not in named and unnamed:
-            named[key] = unnamed.pop(0)
+            best = max(unnamed, key=score)
+            named[key] = best
+            unnamed.remove(best)
+    pick("bg", lambda h: -_lum(h))
+    pick("text", _lum)
+    pick("muted", lambda h: -_sat(h) - abs(_lum(h) - 0.5))
+    bg = named.get("bg", pal["bg"])
+    pick("accent", lambda h: _sat(h) * (abs(_lum(h) - _lum(bg)) + 0.05))
+    if unnamed:  # e.g. a second brand colour: used for the background glow
+        named["accent2"] = unnamed.pop(0)
     pal.update(named)
     return pal
 
 
+def _rgb(h):
+    h = h.lstrip("#")
+    if len(h) == 3:
+        h = "".join(c * 2 for c in h)
+    return [int(h[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+
+
+def _lum(h):
+    r, g, b = _rgb(h)
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def _sat(h):
+    c = _rgb(h)
+    return max(c) - min(c)
+
+
 def split_sections(lines):
     """-> dict(title, palette, scenes_lines, voice_lines, sources_lines)"""
-    sec, out = None, {"title": "", "palette": "", "scenes": [], "voice": [], "sources": []}
+    sec, out = None, {"title": "", "palette": "", "scenes": [], "voice": [], "sources": [], "extra": {}}
     for raw in lines:
         line = clean(raw)
         up = line.upper()
@@ -129,8 +162,7 @@ def split_sections(lines):
         if re.match(r"^COLOU?R\s*PALETTE", up):
             sec = "palette"; out["palette"] += (line.split(":", 1)[1] if ":" in line else "") + "\n"
             continue
-        if re.match(r"^(VOICE[\s-]*OVER|NARRATION)(\s*SCRIPT)?\s*:?\s*$", up) or \
-                re.match(r"^(VOICE[\s-]*OVER|NARRATION)\s*SCRIPT\s*:", up):
+        if re.match(r"^(VOICE[\s-]*OVER|NARRATION)(\s*SCRIPT)?\s*(\([^)]*\))?\s*(:|$)", up):
             sec = "voice"
             rest = line.split(":", 1)[1].strip() if ":" in line else ""
             if rest:
@@ -145,16 +177,25 @@ def split_sections(lines):
             if m.group(2):
                 out["sources"].append(m.group(2))
             continue
+        # any other "ALL CAPS LABEL: ..." line (TOPIC SUMMARY, FONT STYLE, HASHTAGS,
+        # YOUTUBE DESCRIPTION, ...) starts a section we keep only as metadata
+        m = re.match(r"^([A-Z][A-Z0-9 &/()\-]{2,40}?)\s*:\s*(.*)$", line)
+        if m and not re.match(r"^SCENE\s*\d", up):
+            sec = "extra:" + re.sub(r"[^a-z0-9]+", "_", m.group(1).lower()).strip("_")
+            out["extra"][sec[6:]] = m.group(2).strip()
+            continue
         if sec not in ("scenes", "voice") and re.match(r"^SCENE\s*\d+", up):
             sec = "scenes"
         if sec == "palette":
             out["palette"] += line + "\n"
         elif sec in ("scenes", "voice", "sources"):
             out[sec].append(line)
+        elif sec and sec.startswith("extra:") and line:
+            out["extra"][sec[6:]] = (out["extra"][sec[6:]] + " " + line).strip()
     return out
 
 
-FIELD = re.compile(r"^(on[\s-]*screen\s*text|text|headline|visuals?|animation|transition|"
+FIELD = re.compile(r"^(on[\s-]*screen\s*text|text|headline|visuals?|animation|transition(?:\s*to\s*next)?|"
                    r"sub(?:title|text)?|note|voice[\s-]*over|narration)\s*:\s*(.*)$", re.I)
 
 
@@ -183,7 +224,7 @@ def parse_scenes(lines):
                 field = "visual"; cur["visual"] = val
             elif key == "animation":
                 field = "animation"; cur["animation"] = val
-            elif key == "transition":
+            elif key.startswith("transition"):
                 field = "transition"; cur["transition"] = val
             elif key in ("voiceover", "narration"):
                 field = "voice"; cur["voice"] = val
@@ -216,7 +257,7 @@ def split_sentences(text: str):
     return [s.strip() for s in re.split(r"(?<=[.!?।])\s+", text) if s.strip()]
 
 
-def assign_voiceover(voice_lines, n):
+def assign_voiceover(voice_lines, n, scene_texts=None):
     text = "\n".join(voice_lines).strip()
     if not text or n == 0:
         return [""] * n
@@ -231,22 +272,69 @@ def assign_voiceover(voice_lines, n):
             if 0 <= idx < n:
                 out[idx] = (out[idx] + " " + chunk).strip()
         return [unquote(o) for o in out]
-    # no markers: spread sentences over the scenes, balancing characters
+    # no markers: align the text to the scenes (see align_voiceover)
     text = " ".join(unquote(l) for l in voice_lines if l and not re.match(r"^\(.*\)$", l))
-    sents = split_sentences(text)
-    if len(sents) <= n:
-        return sents + [""] * (n - len(sents))
-    total = sum(len(s) for s in sents)
-    out, k, acc = [[] for _ in range(n)], 0, 0
-    for i, s in enumerate(sents):
-        left_s, left_scenes = len(sents) - i, n - k
-        # move to the next scene once this one has its share, but keep at
-        # least one sentence for every remaining scene
-        if out[k] and k < n - 1 and (acc >= total * (k + 1) / n or left_s <= left_scenes - 1):
-            k += 1
-        out[k].append(s)
-        acc += len(s)
-    return [" ".join(o) for o in out]
+    return align_voiceover(text, scene_texts or [""] * n)
+
+
+_STOP = set("this that with from have will what into more over their there about which these "
+            "those them they been were your for and the are all its".split())
+
+
+def _stems(text):
+    return {w[:5] for w in re.findall(r"[a-z]{4,}", text.lower()) if w not in _STOP}
+
+
+def align_voiceover(text, scene_texts):
+    """Split the voiceover into clauses (sentences, then commas) and give each
+    scene a contiguous run of them, maximising words shared with that scene's
+    on-screen text + visual, while keeping lengths balanced and sentences whole."""
+    n = len(scene_texts)
+    units = []
+    for sent in split_sentences(text):
+        parts = [p for p in re.split(r"(?<=,)\s+", sent) if p]
+        merged = []
+        for p in parts:  # don't create tiny fragments
+            if merged and (len(p) < 25 or len(merged[-1]) < 25):
+                merged[-1] += " " + p
+            else:
+                merged.append(p)
+        units += [(u, k == len(merged) - 1) for k, u in enumerate(merged)]
+    m = len(units)
+    if m == 0:
+        return [""] * n
+    if m < n:  # not enough text: one clause per scene, the rest stay empty
+        return [u for u, _ in units] + [""] * (n - m)
+    stems = [_stems(t) for t in scene_texts]
+    total = sum(len(u) for u, _ in units)
+
+    def score(i, j, k):  # units[i:j] -> scene k
+        grp = " ".join(u for u, _ in units[i:j])
+        sc = len(_stems(grp) & stems[k])
+        sc -= 3.0 * abs(len(grp) / total - 1 / n)          # balance
+        sc -= 0.0 if units[j - 1][1] else 0.6               # ends mid-sentence
+        if re.search(r"subscrib|follow|like and share", grp, re.I) and k != n - 1:
+            sc -= 5                                         # call to action belongs at the end
+        return sc
+
+    NEG = float("-inf")
+    best = [[NEG] * (n + 1) for _ in range(m + 1)]
+    back = [[0] * (n + 1) for _ in range(m + 1)]
+    best[0][0] = 0.0
+    for k in range(1, n + 1):
+        for j in range(k, m - (n - k) + 1):
+            for i in range(k - 1, j):
+                if best[i][k - 1] == NEG:
+                    continue
+                v = best[i][k - 1] + score(i, j, k - 1)
+                if v > best[j][k]:
+                    best[j][k], back[j][k] = v, i
+    out, j = [], m
+    for k in range(n, 0, -1):
+        i = back[j][k]
+        out.append(" ".join(u for u, _ in units[i:j]))
+        j = i
+    return out[::-1]
 
 
 def convert(text: str) -> dict:
@@ -256,7 +344,8 @@ def convert(text: str) -> dict:
         raise ValueError("no 'Scene N' blocks found")
     inline_voice = [s["voice"] for s in scenes_raw]
     voice = inline_voice if any(inline_voice) and not sec["voice"] else \
-        assign_voiceover(sec["voice"], len(scenes_raw))
+        assign_voiceover(sec["voice"], len(scenes_raw),
+                         [" ".join(s["onscreen"]) + " " + s["visual"] for s in scenes_raw])
     sources = []
     for l in sec["sources"]:
         sources += [unquote(s) for s in re.split(r"\s*[,;]\s*|\s+and\s+", l) if s.strip()]
@@ -270,8 +359,11 @@ def convert(text: str) -> dict:
         sc = {"headline": head, "sub": sub, "note": note, "narration": v.strip(), "icon": icon,
               "animation": pick_animation(s["animation"]), "transition": pick_transition(s["transition"])}
         scenes.append({k: val for k, val in sc.items() if val != "" or k in ("headline", "narration")})
-    return {"title": sec["title"], "palette": parse_palette(sec["palette"]), "music": "",
-            "sources": sources, "scenes": scenes}
+    out = {"title": sec["title"], "palette": parse_palette(sec["palette"]), "music": "",
+           "sources": sources, "scenes": scenes}
+    if sec["extra"]:
+        out["meta"] = sec["extra"]  # not rendered; handy when uploading
+    return out
 
 
 def main():

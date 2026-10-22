@@ -1,0 +1,39 @@
+TITLE: Push for Peace: Trump’s Ukraine Strategy
+TOPIC SUMMARY: Diplomatic efforts are intensifying to broker a ceasefire in Ukraine by December, involving high-level talks between US and Russian representatives. Meanwhile, ongoing military strains and production reports highlight the complex path toward a lasting resolution.
+COLOR PALETTE: #1E3A8A, #B91C1C, #FFFFFF, #9CA3AF | Background: #0F172A
+FONT STYLE: Bold modern sans-serif
+MUSIC MOOD: Suspenseful documentary, cinematic ambient
+​SCENES:
+Scene 1 | 0s–3s
+​On-screen text: Push for Peace in Ukraine
+​Visual: Minimalist map outline of Eastern Europe with glowing strategic route lines
+​Animation: Zoom in with a sharp fade in
+​Transition to next: Wipe left
+​Scene 2 | 3s–8s
+​On-screen text: High-Level Diplomatic Talks Underway
+​Visual: Abstract icons representing negotiation tables and diplomatic documents
+​Animation: Slide from left
+​Transition to next: Fade
+​Scene 3 | 8s–14s
+​On-screen text: Ceasefire Targets Set for December
+​Visual: A minimalist calendar icon with a highlighted target date
+​Animation: Typewriter effect for text, scale up for icon
+​Transition to next: Zoom in
+​Scene 4 | 14s–20s
+​On-screen text: Military Strains & Production Pressures
+​Visual: Abstract icons of supply chains and defense monitoring equipment
+​Animation: Pendulum sway / slide from right
+​Transition to next: Wipe
+​Scene 5 | 20s–25s
+​On-screen text: Global Stability at a Crossroads
+​Visual: A stylized globe graphic with connecting network pulse dots
+​Animation: Counter counting up numbers, pulse glow
+​Transition to next: Fade
+​Scene 6 | 25s–30s
+​On-screen text: What Lies Ahead? Subscribe for More.
+​Visual: Minimalist subscribe and share icon shapes
+​Animation: Fade in and subtle bounce
+​Transition to next: None
+​VOICEOVER SCRIPT (optional): Diplomatic efforts are accelerating to achieve a ceasefire in Ukraine by December, driven by high-level international meetings. As officials negotiate potential frameworks, defense production and frontline strains continue to shape the geopolitical landscape. With global stability hanging in the balance, all eyes remain on upcoming peace talks and strategic developments. What does this mean for the future of the region? Subscribe for more deep dives into world events.
+YOUTUBE DESCRIPTION: Explore the latest diplomatic push and strategic developments surrounding the war in Ukraine. We analyze recent talks, ceasefire targets, and global impacts. Subscribe for more geopolitical insights.
+HASHTAGS: #UkraineWar #Geopolitics #WorldNews #GlobalDiplomacy #CurrentEvents #Documentary #PeaceTalks #TrendingNow #Explainer #WorldBeat

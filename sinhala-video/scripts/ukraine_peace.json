@@ -1,0 +1,63 @@
+{
+  "title": "Push for Peace: Trump’s Ukraine Strategy",
+  "palette": {
+    "bg": "#0F172A",
+    "accent": "#B91C1C",
+    "text": "#FFFFFF",
+    "muted": "#9CA3AF",
+    "accent2": "#1E3A8A"
+  },
+  "music": "",
+  "sources": [],
+  "scenes": [
+    {
+      "headline": "Push for Peace in Ukraine",
+      "narration": "Diplomatic efforts are accelerating to achieve a ceasefire in Ukraine by December,",
+      "icon": "pin",
+      "animation": "zoom",
+      "transition": "wipe"
+    },
+    {
+      "headline": "High-Level Diplomatic Talks Underway",
+      "narration": "driven by high-level international meetings.",
+      "icon": "people",
+      "animation": "slide-right",
+      "transition": "fade"
+    },
+    {
+      "headline": "Ceasefire Targets Set for December",
+      "narration": "As officials negotiate potential frameworks,",
+      "icon": "calendar",
+      "animation": "typewriter",
+      "transition": "zoom"
+    },
+    {
+      "headline": "Military Strains & Production Pressures",
+      "narration": "defense production and frontline strains continue to shape the geopolitical landscape.",
+      "icon": "scale",
+      "animation": "slide-left",
+      "transition": "wipe"
+    },
+    {
+      "headline": "Global Stability at a Crossroads",
+      "narration": "With global stability hanging in the balance, all eyes remain on upcoming peace talks and strategic developments.",
+      "icon": "globe",
+      "animation": "fade",
+      "transition": "fade"
+    },
+    {
+      "headline": "What Lies Ahead? Subscribe for More.",
+      "narration": "What does this mean for the future of the region? Subscribe for more deep dives into world events.",
+      "icon": "subscribe",
+      "animation": "bounce",
+      "transition": "fade"
+    }
+  ],
+  "meta": {
+    "topic_summary": "Diplomatic efforts are intensifying to broker a ceasefire in Ukraine by December, involving high-level talks between US and Russian representatives. Meanwhile, ongoing military strains and production reports highlight the complex path toward a lasting resolution.",
+    "font_style": "Bold modern sans-serif",
+    "music_mood": "Suspenseful documentary, cinematic ambient",
+    "youtube_description": "Explore the latest diplomatic push and strategic developments surrounding the war in Ukraine. We analyze recent talks, ceasefire targets, and global impacts. Subscribe for more geopolitical insights.",
+    "hashtags": "#UkraineWar #Geopolitics #WorldNews #GlobalDiplomacy #CurrentEvents #Documentary #PeaceTalks #TrendingNow #Explainer #WorldBeat"
+  }
+}

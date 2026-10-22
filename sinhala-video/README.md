@@ -58,8 +58,12 @@ python3 gemini_to_json.py gemini.txt -o scripts/uae_visa.json
 The converter reads TITLE, COLOR PALETTE, SCENES ("On-screen text", "Visual", "Animation", "Transition"),
 VOICEOVER SCRIPT and an optional SOURCES line. If the voiceover has `[Scene N]` / `Scene N:` markers, it
 follows them. If not, it splits the voiceover into sentences and spreads them across the scenes. It picks an
-icon from the Visual text and maps the animation and transition wording onto the supported names. Translate
-or edit the text fields to Sinhala afterwards. See `examples/gemini_sample.txt`.
+icon from the Visual text and maps the animation and transition wording onto the supported names. It also handles the
+`Scene 1 | 0s–3s` / `Transition to next:` / `VOICEOVER SCRIPT (optional):` layout, palettes without labels
+(colours are sorted into background, text, muted grey and accent by how they look; a spare brand colour
+becomes `accent2`, which tints the background glow), and invisible zero-width characters copied from Gemini.
+Unknown sections such as YOUTUBE DESCRIPTION, HASHTAGS and MUSIC MOOD are kept under `"meta"` for
+uploading and are not rendered. Translate or edit the text fields to Sinhala afterwards. See `examples/` and `gemini/`.
 
 ## Script format
 

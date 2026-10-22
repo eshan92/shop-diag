@@ -1,0 +1,65 @@
+{
+  "title": "සාමය සඳහා පෙරට: ට්‍රම්ප්ගේ යුක්රේන උපාය මාර්ගය",
+  "palette": {
+    "bg": "#0F172A",
+    "accent": "#B91C1C",
+    "text": "#FFFFFF",
+    "muted": "#9CA3AF",
+    "accent2": "#1E3A8A"
+  },
+  "music": "",
+  "sources": [],
+  "scenes": [
+    {
+      "headline": "යුක්රේනයේ *සාමය* සඳහා නව පියවරක්",
+      "narration": "දෙසැම්බර් වන විට යුක්රේනයේ සටන් විරාමයක් ඇති කර ගැනීමට රාජ්‍ය තාන්ත්‍රික උත්සාහයන් වේගවත් වෙමින් පවතිනවා.",
+      "icon": "pin",
+      "animation": "zoom",
+      "transition": "wipe"
+    },
+    {
+      "headline": "ඉහළ පෙළේ රාජ්‍ය තාන්ත්‍රික සාකච්ඡා පැවැත්වෙමින්",
+      "sub": "එක්සත් ජනපද සහ රුසියානු නියෝජිතයන් අතර",
+      "narration": "ඒ සඳහා ඉහළ පෙළේ ජාත්‍යන්තර හමුවීම් රැසක් පැවැත්වෙනවා.",
+      "icon": "people",
+      "animation": "slide-right",
+      "transition": "fade"
+    },
+    {
+      "headline": "සටන් විරාමය සඳහා *දෙසැම්බර්* ඉලක්කය",
+      "narration": "නිලධාරීන් හැකි සාම රාමු පිළිබඳව සාකච්ඡා කරමින් සිටිනවා.",
+      "icon": "calendar",
+      "animation": "typewriter",
+      "transition": "zoom"
+    },
+    {
+      "headline": "යුද පීඩනය සහ ආයුධ නිෂ්පාදන අභියෝග",
+      "narration": "එහෙත් ආරක්ෂක නිෂ්පාදනය සහ පෙරමුණේ පීඩනය තවමත් භූ දේශපාලන තත්ත්වය හැඩගස්වනවා.",
+      "icon": "scale",
+      "animation": "slide-left",
+      "transition": "wipe"
+    },
+    {
+      "headline": "ගෝලීය ස්ථාවරත්වය *තීරණාත්මක* සන්ධිස්ථානයක",
+      "narration": "ගෝලීය ස්ථාවරත්වය අවදානමේ තිබියදී, ඉදිරි සාම සාකච්ඡා දෙස මුළු ලොවම බලා සිටිනවා.",
+      "icon": "globe",
+      "animation": "fade",
+      "transition": "fade"
+    },
+    {
+      "headline": "ඉදිරියට කුමක් සිදුවේද?",
+      "sub": "තවත් විශ්ලේෂණ සඳහා Subscribe කරන්න",
+      "narration": "මෙය කලාපයේ අනාගතයට අදහස් කරන්නේ කුමක්ද? ලෝක පුවත් පිළිබඳ තවත් ගැඹුරු විශ්ලේෂණ සඳහා අපේ චැනලය සබ්ස්ක්‍රයිබ් කරන්න.",
+      "icon": "subscribe",
+      "animation": "bounce",
+      "transition": "fade"
+    }
+  ],
+  "meta": {
+    "topic_summary": "Diplomatic efforts are intensifying to broker a ceasefire in Ukraine by December, involving high-level talks between US and Russian representatives. Meanwhile, ongoing military strains and production reports highlight the complex path toward a lasting resolution.",
+    "font_style": "Bold modern sans-serif",
+    "music_mood": "Suspenseful documentary, cinematic ambient",
+    "youtube_description": "Explore the latest diplomatic push and strategic developments surrounding the war in Ukraine. We analyze recent talks, ceasefire targets, and global impacts. Subscribe for more geopolitical insights.",
+    "hashtags": "#UkraineWar #Geopolitics #WorldNews #GlobalDiplomacy #CurrentEvents #Documentary #PeaceTalks #TrendingNow #Explainer #WorldBeat"
+  }
+}
