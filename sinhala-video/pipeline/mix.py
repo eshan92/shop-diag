@@ -1,4 +1,4 @@
-"""Audio: voice track, music bed (file or synthesized drone), ducking, loudness."""
+"""Audio: voice track, music bed (file or synthesized), sound effects, ducking, loudness."""
 from __future__ import annotations
 
 import json
@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 
 from .audio_io import SR, read_audio, write_wav
+from .sound import sfx_track, style_for, synth_music
 
 
 def voice_track(scenes: list[dict], speeches: list, total: float) -> np.ndarray:
@@ -23,32 +24,7 @@ def voice_track(scenes: list[dict], speeches: list, total: float) -> np.ndarray:
     return out
 
 
-def drone(total: float, seed: int = 7) -> np.ndarray:
-    """Dark ambient bed: detuned low pad + slow filtered noise, stereo."""
-    n = int(total * SR) + 1
-    t = np.arange(n, dtype=np.float64) / SR
-    rng = np.random.default_rng(seed)
-    out = np.zeros((n, 2))
-    # D minor-ish cluster, slightly detuned per channel for width
-    for f, a in ((36.71, 1.0), (55.0, 0.55), (73.42, 0.6), (87.31, 0.25), (110.0, 0.18)):
-        for ch, det in ((0, 0.998), (1, 1.002)):
-            lfo = 0.65 + 0.35 * np.sin(2 * np.pi * (0.05 + 0.02 * a) * t + rng.uniform(0, 6.28))
-            out[:, ch] += a * lfo * np.sin(2 * np.pi * f * det * t + rng.uniform(0, 6.28))
-    # breathy rumble: brown noise (integrated white noise) with its slow drift removed
-    filt = np.cumsum(rng.standard_normal((n, 2)), axis=0)
-    w = SR // 4
-    c = np.cumsum(np.vstack([np.zeros((1, 2)), filt]), axis=0)
-    lo = np.clip(np.arange(n) - w, 0, n)
-    hi = np.clip(np.arange(n) + w, 0, n)
-    filt -= (c[hi] - c[lo]) / (hi - lo)[:, None]
-    filt /= np.max(np.abs(filt)) + 1e-9
-    swell = 0.5 + 0.5 * np.sin(2 * np.pi * 0.03 * t)[:, None]
-    out += 0.8 * filt * swell
-    out /= np.max(np.abs(out)) + 1e-9
-    return out.astype(np.float32)
-
-
-def music_bed(music: Path | None, total: float, log=print) -> np.ndarray:
+def music_bed(music: Path | None, total: float, style: str, scenes: list[dict], log=print) -> np.ndarray:
     n = int(total * SR) + 1
     if music:
         x = read_audio(music, channels=2)
@@ -57,11 +33,9 @@ def music_bed(music: Path | None, total: float, log=print) -> np.ndarray:
         reps = int(np.ceil(n / len(x)))
         if reps > 1:
             log(f"  music is shorter than the video, looping it x{reps}")
-        x = np.tile(x, (reps, 1))[:n]
-    else:
-        log("  no music given: synthesizing an ambient drone bed")
-        x = drone(total)
-    return x
+        return np.tile(x, (reps, 1))[:n]
+    log(f"  no music file: synthesizing a '{style}' music bed")
+    return synth_music(style, total, scenes)
 
 
 def _rms_db(x: np.ndarray) -> float:
@@ -93,10 +67,14 @@ def duck_envelope(scenes: list[dict], speeches: list, total: float, duck: float,
     return g
 
 
-def mix(scenes, speeches, total, music: Path | None, cfg: dict, out_wav: Path, log=print):
+def mix(scenes, speeches, total, music: Path | None, cfg: dict, out_wav: Path, mood: str | None = None,
+        log=print):
     a = cfg["audio"]
     v = voice_track(scenes, speeches, total)
-    m = music_bed(music, total, log)
+    style = a.get("music_style", "auto")
+    if style == "auto":
+        style = style_for(mood)
+    m = music_bed(music, total, style, scenes, log)
     m *= 10 ** ((float(a["music_level_db"]) - _rms_db(m)) / 20)
     m *= duck_envelope(scenes, speeches, total, float(a["music_duck"]))[:, None]
     n = len(m)
@@ -105,6 +83,10 @@ def mix(scenes, speeches, total, music: Path | None, cfg: dict, out_wav: Path, l
     m *= fade[:, None].astype(np.float32)
     # voice centred in both channels; leave headroom, loudnorm sets the final level
     x = m + v
+    if a.get("sfx", True):
+        fx = sfx_track(scenes, total, float(cfg["timing"]["transition"]))
+        peak = float(np.max(np.abs(v))) or 0.89  # sfx level is relative to the voice peak
+        x += fx * (peak * 10 ** (float(a.get("sfx_level_db", -6)) / 20) / (np.max(np.abs(fx)) + 1e-9))
     x *= 0.5 / (np.max(np.abs(x)) + 1e-9)
     raw = out_wav.with_suffix(".raw.wav")
     write_wav(raw, x, SR)

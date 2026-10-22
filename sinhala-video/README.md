@@ -111,7 +111,13 @@ re-render doesn't call the voice service again. Delete that folder to force new 
 ## Audio
 
 - **Music:** from the script's `music` (searched relative to the current folder, the project folder and
-  `music/`). A track shorter than the video is looped. With no track, a dark ambient drone is synthesized with numpy.
+  `music/`). A track shorter than the video is looped. With no track, music is synthesized
+  (`pipeline/sound.py`). `audio.music_style: auto` picks the style from the script's `music_mood`
+  (or `meta.music_mood` from the Gemini converter): **suspense** is a cinematic documentary bed (sub drone,
+  slow minor string pad, heartbeat pulse, riser into the last scene), and **ambient** is a plain dark drone.
+- **Sound effects** (`audio.sfx`, `audio.sfx_level_db`): a whoosh on every scene transition (panned with the
+  wipe direction) and a deep impact on the first frame and when the last scene lands. They play on top of
+  any music and aren't ducked.
 - **Ducking:** volume automation, not a compressor. Music drops to 15% while someone speaks, and short gaps
   between scenes are bridged so the music doesn't pump. It fades in over 1 s and out over 2 s.
 - **Loudness:** the final mix is normalised with two-pass `loudnorm` to -14 LUFS, -1.5 dBTP.

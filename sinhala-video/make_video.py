@@ -40,7 +40,7 @@ def load_config(path: Path) -> dict:
         "timing": {"fps": 30, "padding": 0.6, "min_scene": 2.5, "no_narration_scene": 3.0,
                    "voice_lead_in": 0.15, "transition": 0.5, "outro_hold": 1.5},
         "subtitles": {"enabled": True, "max_words": 4, "max_chars": 32},
-        "audio": {"music_duck": 0.15, "music_level_db": -20, "fade_in": 1.0, "fade_out": 2.0,
+        "audio": {"music_style": "auto", "sfx": True, "sfx_level_db": -6, "music_duck": 0.15, "music_level_db": -20, "fade_in": 1.0, "fade_out": 2.0,
                   "target_lufs": -14, "true_peak": -1.5},
         "render": {"jpeg_quality": 92, "crf": 18, "preset": "medium", "workers": 0},
     }
@@ -142,7 +142,8 @@ def main():
         mix_wav = work / "mix.wav"
         if not args.preview_only:
             print("[2/4] audio mix")
-            mix(scenes, speeches, total, find_music(script, args.script, args.music), cfg, mix_wav)
+            mood = script.get("music_mood") or (script.get("meta") or {}).get("music_mood")
+            mix(scenes, speeches, total, find_music(script, args.script, args.music), cfg, mix_wav, mood)
             print(f"  loudness {measure_lufs(mix_wav):.1f} LUFS (target {cfg['audio']['target_lufs']})")
 
         for fmt in formats:
