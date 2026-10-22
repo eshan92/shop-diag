@@ -68,15 +68,19 @@ def duck_envelope(scenes: list[dict], speeches: list, total: float, duck: float,
 
 
 def mix(scenes, speeches, total, music: Path | None, cfg: dict, out_wav: Path, mood: str | None = None,
-        log=print):
+        with_voice: bool = True, log=print):
     a = cfg["audio"]
-    v = voice_track(scenes, speeches, total)
+    if with_voice:
+        v = voice_track(scenes, speeches, total)
+    else:
+        v = np.zeros((int(total * SR) + 1, 1), dtype=np.float32)
     style = a.get("music_style", "auto")
     if style == "auto":
         style = style_for(mood)
     m = music_bed(music, total, style, scenes, log)
     m *= 10 ** ((float(a["music_level_db"]) - _rms_db(m)) / 20)
-    m *= duck_envelope(scenes, speeches, total, float(a["music_duck"]))[:, None]
+    if with_voice:
+        m *= duck_envelope(scenes, speeches, total, float(a["music_duck"]))[:, None]
     n = len(m)
     t = np.arange(n) / SR
     fade = np.minimum(np.clip(t / float(a["fade_in"]), 0, 1), np.clip((total - t) / float(a["fade_out"]), 0, 1))
@@ -85,7 +89,8 @@ def mix(scenes, speeches, total, music: Path | None, cfg: dict, out_wav: Path, m
     x = m + v
     if a.get("sfx", True):
         fx = sfx_track(scenes, total, float(cfg["timing"]["transition"]))
-        peak = float(np.max(np.abs(v))) or 0.89  # sfx level is relative to the voice peak
+        # sfx level is relative to the voice peak; without a voice, to the music peak
+        peak = float(np.max(np.abs(v))) or float(np.max(np.abs(m))) or 0.89
         x += fx * (peak * 10 ** (float(a.get("sfx_level_db", -6)) / 20) / (np.max(np.abs(fx)) + 1e-9))
     x *= 0.5 / (np.max(np.abs(x)) + 1e-9)
     raw = out_wav.with_suffix(".raw.wav")

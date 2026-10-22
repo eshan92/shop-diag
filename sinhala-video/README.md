@@ -36,6 +36,7 @@ python3 make_video.py scripts/sample.json --format both
 python3 make_video.py scripts/sample.json --preview-only     # contact sheet + layout check, ~10 s, no TTS
 python3 make_video.py scripts/sample.json --offline          # skip edge-tts, use MMS (then espeak-ng)
 python3 make_video.py scripts/sample.json --music music/dramatic.mp3   # override the script's music
+python3 make_video.py scripts/sample.json --no-voice         # music + sound effects + subtitles, no voiceover
 ```
 
 Output goes to `output/`:

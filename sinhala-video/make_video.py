@@ -6,6 +6,7 @@
   python make_video.py scripts/sample.json --format both
   python make_video.py scripts/sample.json --preview-only      # contact sheet only, no TTS
   python make_video.py scripts/sample.json --offline           # skip edge-tts
+  python make_video.py scripts/sample.json --no-voice          # music + sound effects + subtitles only
 """
 from __future__ import annotations
 
@@ -81,6 +82,9 @@ def main():
     ap.add_argument("script", type=Path)
     ap.add_argument("--format", choices=["shorts", "youtube", "both"], default="shorts")
     ap.add_argument("--offline", action="store_true", help="don't use edge-tts (MMS / espeak only)")
+    ap.add_argument("--no-voice", action="store_true",
+                    help="no voiceover: background music + sound effects only (subtitles still shown, "
+                         "timed at a normal reading pace)")
     ap.add_argument("--preview-only", action="store_true",
                     help="only write the contact sheet + layout check (estimated timings, no TTS)")
     ap.add_argument("--music", help="override the script's music file")
@@ -106,7 +110,9 @@ def main():
     # 1) voice ------------------------------------------------------------------
     print(f"[1/4] voice for {len(script['scenes'])} scenes")
     speeches = []
-    if args.preview_only:
+    if args.preview_only or args.no_voice:
+        if args.no_voice:
+            print("  --no-voice: no voiceover, scene lengths from estimated reading time")
         speeches = [estimate_speech(s["narration"]) if (s.get("narration") or "").strip() else None
                     for s in script["scenes"]]
     else:
@@ -143,13 +149,14 @@ def main():
         if not args.preview_only:
             print("[2/4] audio mix")
             mood = script.get("music_mood") or (script.get("meta") or {}).get("music_mood")
-            mix(scenes, speeches, total, find_music(script, args.script, args.music), cfg, mix_wav, mood)
+            mix(scenes, speeches, total, find_music(script, args.script, args.music), cfg, mix_wav, mood,
+                with_voice=not args.no_voice)
             print(f"  loudness {measure_lufs(mix_wav):.1f} LUFS (target {cfg['audio']['target_lufs']})")
 
         for fmt in formats:
             w, h = FORMATS[fmt]
             data = {**base_data, "width": w, "height": h}
-            out = next_output(args.out, name, fmt)
+            out = next_output(args.out, name + ("_novoice" if args.no_voice else ""), fmt)
             sheet = out.with_name(out.stem + "_preview.png")
             print(f"[3/4] {fmt} {w}x{h}: preview + layout check -> {sheet.name}")
             issues = preview_and_check(data, sheet)
